@@ -46,6 +46,16 @@
       display: none;
     }
   </style>
+
+  <!-- Service Worker registration for offline support -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW registration failed', err));
+      });
+    }
+  </script>
+
 </head>
 <body>
   <div class="section">
@@ -106,7 +116,7 @@
     <button onclick="clearTable()">محو الجدول</button>
     <input type="text" id="filenameInput" placeholder="اسم الملف" style="width: 150px;">
     <button onclick="exportTable('excel')">تحميل Excel</button>
-    <button onclick="downloadSectionAsJPG('logTable', 'سجل_المشاكل')">تحميل كـ JPG</button>
+    <button onclick="downloadSectionAsJPG('logTable', 'سجل_المشاكل')">تحميل كـ JPG</button> <button onclick="downloadSectionAsPDF('logTable','سجل_المشاكل')">تحميل كـ PDF</button>
     <table id="logTable">
       <thead>
         <tr>
@@ -134,9 +144,9 @@
     </select>
     <canvas id="damageChart" width="400" height="200"></canvas>
     <br>
-    <button onclick="downloadSectionAsJPG('damageChart', 'رسم_تلخيص_الاضرار')">تحميل الرسم كـ JPG</button>
-    <button onclick="downloadSectionAsJPG('summaryDetails', 'تفصيل_الاضرار')">تحميل تفصيل الأضرار كـ JPG</button>
-    <button onclick="downloadSectionAsJPG('problemSummaryTable', 'جدول_حسب_المشكلة')">تحميل جدول المشاكل كـ JPG</button>
+    <button onclick="downloadSectionAsJPG('damageChart', 'رسم_تلخيص_الاضرار')">تحميل الرسم كـ JPG</button> <button onclick="downloadSectionAsPDF('damageChart','رسم_تلخيص_الاضرار')">تحميل الرسم كـ PDF</button>
+    <button onclick="downloadSectionAsJPG('summaryDetails', 'تفصيل_الاضرار')">تحميل تفصيل الأضرار كـ JPG</button> <button onclick="downloadSectionAsPDF('summaryDetails','تفصيل_الاضرار')">تحميل كـ PDF</button>
+    <button onclick="downloadSectionAsJPG('problemSummaryTable', 'جدول_حسب_المشكلة')">تحميل جدول المشاكل كـ JPG</button> <button onclick="downloadSectionAsPDF('problemSummaryTable','جدول_حسب_المشكلة')">تحميل كـ PDF</button>
     <button onclick="clearSummary()">محو الجداول</button>
 
     <div id="summaryDetails">
@@ -183,6 +193,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
   <script>
@@ -403,6 +414,16 @@
       if(Notification.permission==='granted') new Notification(msg);
       else alert(msg);
     }
-  </script>
+  
+    function downloadSectionAsPDF(id, filename){
+      const element = document.getElementById(id);
+      html2canvas(element).then(canvas=>{
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jspdf.jsPDF('l', 'pt', [canvas.width, canvas.height]);
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save(filename + '.pdf');
+      });
+    }
+</script>
 </body>
 </html>

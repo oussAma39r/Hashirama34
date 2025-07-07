@@ -1,67 +1,71 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>نظام مراقبة مشاكل الفريزرات – نسخة متقدمة</title>
-  <style>
-    body {
-      font-family: 'Arial', sans-serif;
-      background-color: #f4f4f4;
-      direction: rtl;
-      text-align: right;
-      padding: 20px;
-    }
-    input, select, textarea, button {
-      padding: 8px;
-      margin: 5px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    table, th, td {
-      border: 1px solid #aaa;
-    }
-    th, td {
-      padding: 8px;
-      text-align: center;
-    }
-    .section {
-      background: #fff;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-    }
-    canvas {
-      max-width: 100%;
-      margin-top: 20px;
-    }
-    .image-preview {
-      max-width: 100px;
-      max-height: 100px;
-    }
-    .hidden {
-      display: none;
-    }
-  </style>
-
-  <!-- Service Worker registration for offline support -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW registration failed', err));
-      });
-    }
-  </script>
-
+<meta charset="UTF-8">
+<title>نظام مراقبة الفريزرات – v9</title>
+<style>
+  :root{
+    --bg:#2f3640;
+    --section-bg:#353b48;
+    --table-bg:#2d3436;
+    --border:#636e72;
+    --text:#ecf0f1;
+    --accent:#00cec9;
+  }
+  *{box-sizing:border-box;font-family:'Arial',sans-serif;}
+  body{margin:0;background:var(--bg);color:var(--text);}
+  /* Sidebar */
+  .sidebar{
+    height:100%;width:0;position:fixed;z-index:3;top:0;right:0;
+    background:#111;overflow-x:hidden;transition:0.3s;padding-top:60px;
+  }
+  .sidebar a{
+    display:block;padding:10px 30px;font-size:18px;color:#f1f1f1;text-decoration:none;
+  }
+  .sidebar a:hover{background:#575757;}
+  .sidebar .closebtn{position:absolute;top:0;right:25px;font-size:36px;}
+  .openbtn{
+    font-size:30px;cursor:pointer;color:#fff;position:fixed;top:15px;right:15px;z-index:4;
+  }
+  /* Sections */
+  .sectionPage{display:none;padding:80px 20px;}
+  .section{background:var(--section-bg);padding:20px;border-radius:8px;margin-bottom:20px;}
+  /* Inputs */
+  input,select,textarea,button{
+    padding:8px;margin:5px;border-radius:4px;border:1px solid var(--border);
+    background:var(--table-bg);color:var(--text);
+  }
+  button{cursor:pointer;background:var(--accent);color:#000;font-weight:bold;}
+  /* Table */
+  table{width:100%;border-collapse:collapse;background:var(--table-bg);font-size:14px;}
+  th,td{border:1px solid #555;padding:8px;text-align:center;color:#fff;}
+  th{background:var(--border);}
+  .image-preview{max-width:150px;max-height:120px;object-fit:contain;display:block;margin:auto;border:1px solid #ccc;border-radius:4px;box-shadow:0 0 5px rgba(0,0,0,0.4);}
+  canvas{max-width:100%;margin-top:20px;}
+</style>
 </head>
 <body>
+
+<!-- Hamburger -->
+<span class="openbtn" onclick="toggleSidebar()">&#9776;</span>
+
+<!-- Sidebar -->
+<div id="mySidebar" class="sidebar">
+  <a href="javascript:void(0)" class="closebtn" onclick="toggleSidebar()">&times;</a>
+  <a href="#" onclick="showSection('entrySection')">ادخال مشكلة جديدة</a>
+  <a href="#" onclick="showSection('dateSection')">التقارير حسب التاريخ</a>
+  <a href="#" onclick="showSection('summarySection');scrollToAnchor('dailyReportTitle')">التقرير اليومي</a>
+  <a href="#" onclick="showSection('summarySection');scrollToAnchor('weeklyMoldTable')">التقرير الأسبوعي</a>
+  <a href="#" onclick="showSection('summarySection');scrollToAnchor('monthlyMoldTable')">التقرير الشهري</a>
+  <a href="#" onclick="showSection('summarySection');scrollToAnchor('yearlyMoldTable')">التقرير السنوي</a>
+</div>
+
+<!-- إدخال مشكلة جديدة -->
+<div id="entrySection" class="sectionPage" style="display:block;">
   <div class="section">
     <h2>إدخال مشكلة جديدة</h2>
-    <label>كود المجمدة (6 أرقام):</label>
-    <input type="text" id="ean6" oninput="chercherCongelateur()" placeholder="مثال: 048813">
+    <label>كود المجمدة:</label>
+    <input type="text" id="ean6" oninput="chercherCongelateur()" placeholder="048813">
     <label>اسم الفريزر:</label>
     <input type="text" id="freezerName" readonly>
     <br>
@@ -73,357 +77,193 @@
       <option value="عطل في الضاغط">عطل في الضاغط</option>
       <option value="خدوش أو انبعاجات أثناء النقل">خدوش أو انبعاجات أثناء النقل</option>
       <option value="إمالة الهيكل أثناء النقل">إمالة الهيكل أثناء النقل</option>
-      <option value="توزيع غير متساو للرغوة">توزيع غير متساو للرغوة</option>
-      <option value="فراغات أو تجاويف في الرغوة">فراغات أو تجاويف في الرغوة</option>
-      <option value="تشوهات في الهيكل">تشوهات في الهيكل</option>
-      <option value="رغوة زائدة أو تسرب">رغوة زائدة أو تسرب</option>
-      <option value="رائحة كيميائية قوية">رائحة كيميائية قوية</option>
-      <option value="تكثف داخلي أو تأكل">تكثف داخلي أو تأكل</option>
       <option value="مشاكل القالب الداخلي">مشاكل القالب الداخلي</option>
       <option value="مشاكل القالب الخارجي">مشاكل القالب الخارجي</option>
       <option value="مشاكل الإطار البلاستيكي">مشاكل الإطار البلاستيكي</option>
       <option value="مشاكل أخرى">مشاكل أخرى</option>
     </select>
-    <br>
-    <label>رقم القالب (1‑6):</label>
-    <select id="moldNumber">
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="4">4</option>
-      <option value="5">5</option>
-      <option value="6">6</option>
-    </select>
+    <label>رقم القالب:</label>
+    <select id="moldNumber"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
     <br>
     <label>وصف المشكلة:</label>
-    <textarea id="description" rows="2" cols="30" placeholder="وصف مختصر..."></textarea>
+    <textarea id="description" rows="2"></textarea>
     <br>
-    <label>التقاط صورة:</label>
+    <label>صورة:</label>
     <input type="file" id="imageInput" accept="image/*" capture="environment" onchange="previewImage()">
-    <div id="imagePreviewContainer" class="hidden"></div>
+    <div id="imagePreviewContainer" style="display:none;"></div>
     <br>
-    <label>التاريخ:</label>
-    <input type="date" id="date">
-    <label>الوقت:</label>
-    <input type="time" id="time">
+    <label>التاريخ:</label><input type="date" id="date">
+    <label>الوقت:</label><input type="time" id="time">
     <label>الفترة:</label>
-    <select id="period">
-      <option value="صباحية">صباحية (08:00‑16:25)</option>
-      <option value="مسائية">مسائية (16:30‑00:25)</option>
-    </select>
+    <select id="period"><option value="صباحية">صباحية</option><option value="مسائية">مسائية</option></select>
     <br>
     <button onclick="addRow()">إضافة للسجل</button>
+  </div>
+</div>
+
+<!-- التقارير حسب التاريخ (جدول السجل) -->
+<div id="dateSection" class="sectionPage">
+  <div class="section">
+    <h2>التقارير حسب التاريخ</h2>
+    <label>تاريخ السجل:</label><input type="date" id="loadDate">
+    <button onclick="loadData()">عرض</button>
+    <button onclick="saveData()">حفظ بيانات هذا التاريخ</button>
     <button onclick="clearTable()">محو الجدول</button>
-    <input type="text" id="filenameInput" placeholder="اسم الملف" style="width: 150px;">
-    <button onclick="exportTable('excel')">تحميل Excel</button>
-    <button onclick="downloadSectionAsJPG('logTable', 'سجل_المشاكل')">تحميل كـ JPG</button> <button onclick="downloadSectionAsPDF('logTable','سجل_المشاكل')">تحميل كـ PDF</button>
-    <table id="logTable">
-      <thead>
-        <tr>
-          <th>التاريخ</th>
-          <th>الوقت</th>
-          <th>الفترة</th>
-          <th>اسم الفريزر</th>
-          <th>المشكلة</th>
-          <th>رقم القالب</th>
-          <th>وصف المشكلة</th>
-          <th>الصورة</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <div class="section" id="summarySection">
-    <h2>تلخيص الأضرار</h2>
-    <label>نوع الرسم البياني:</label>
-    <select id="chartType" onchange="drawChart()">
-      <option value="bar">عمودي</option>
-      <option value="pie">دائري</option>
-      <option value="line">خطي</option>
-    </select>
-    <canvas id="damageChart" width="400" height="200"></canvas>
+    <input type="text" id="filenameInput" placeholder="اسم الملف">
+    <button onclick="exportTable('pdf')">PDF تحميل</button>
+    <button onclick="exportTable('excel')">Excel تحميل</button>
     <br>
-    <button onclick="downloadSectionAsJPG('damageChart', 'رسم_تلخيص_الاضرار')">تحميل الرسم كـ JPG</button> <button onclick="downloadSectionAsPDF('damageChart','رسم_تلخيص_الاضرار')">تحميل الرسم كـ PDF</button>
-    <button onclick="downloadSectionAsJPG('summaryDetails', 'تفصيل_الاضرار')">تحميل تفصيل الأضرار كـ JPG</button> <button onclick="downloadSectionAsPDF('summaryDetails','تفصيل_الاضرار')">تحميل كـ PDF</button>
-    <button onclick="downloadSectionAsJPG('problemSummaryTable', 'جدول_حسب_المشكلة')">تحميل جدول المشاكل كـ JPG</button> <button onclick="downloadSectionAsPDF('problemSummaryTable','جدول_حسب_المشكلة')">تحميل كـ PDF</button>
-    <button onclick="clearSummary()">محو الجداول</button>
-
-    <div id="summaryDetails">
-      <h3>تفصيل الأضرار حسب القالب (يومي)</h3>
-      <table id="dailyMoldTable">
-        <thead>
-          <tr><th>رقم القالب</th><th>عدد الحالات</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-
-      <h3>تفصيل الأضرار حسب القالب (أسبوعي)</h3>
-      <table id="weeklyMoldTable">
-        <thead>
-          <tr><th>رقم القالب</th><th>عدد الحالات</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-
-      <h3>تفصيل الأضرار حسب القالب (شهري)</h3>
-      <table id="monthlyMoldTable">
-        <thead>
-          <tr><th>رقم القالب</th><th>عدد الحالات</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-
-      <h3>تفصيل الأضرار حسب القالب (سنوي)</h3>
-      <table id="yearlyMoldTable">
-        <thead>
-          <tr><th>رقم القالب</th><th>عدد الحالات</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <h3>تفصيل الأضرار حسب نوع المشكلة</h3>
-    <table id="problemSummaryTable">
-      <thead>
-        <tr><th>المشكلة</th><th>عدد الحالات</th></tr>
-      </thead>
+    <table id="logTable" style="width:85%;margin:auto;">
+      <thead><tr>
+        <th>التاريخ</th><th>الوقت</th><th>الفترة</th><th>اسم الفريزر</th>
+        <th>المشكلة</th><th>رقم القالب</th><th>وصف</th><th>الصورة</th>
+      </tr></thead>
       <tbody></tbody>
     </table>
   </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- ملخص الأضرار -->
+<div id="summarySection" class="sectionPage">
+  <div class="section">
+    <h2>ملخص الأضرار</h2>
+    <select id="chartType" onchange="drawChart()">
+      <option value="bar">عمودي</option><option value="pie">دائري</option><option value="line">خطي</option>
+    </select>
+    <canvas id="damageChart" height="200"></canvas>
+    <br>
+    <button onclick="exportSummaryCombinedPDF()">تحميل ملخص PDF</button>
+    <div id="summaryDetails">
+      <h3 id="dailyReportTitle">التقرير اليومي</h3>
+      <table id="dailyProblemTable"><thead><tr><th>المشكلة</th><th>عدد (اليوم)</th></tr></thead><tbody></tbody></table>
+      <h3>تفصيل الأضرار حسب القالب (يومي)</h3>
+      <table id="dailyMoldTable"><thead><tr><th>رقم</th><th>عدد</th></tr></thead><tbody></tbody></table>
+      <h3>تفصيل الأضرار حسب القالب (أسبوعي)</h3>
+      <table id="weeklyMoldTable"><thead><tr><th>رقم</th><th>عدد</th></tr></thead><tbody></tbody></table>
+      <h3>تفصيل الأضرار حسب القالب (شهري)</h3>
+      <table id="monthlyMoldTable"><thead><tr><th>رقم</th><th>عدد</th></tr></thead><tbody></tbody></table>
+      <h3>تفصيل الأضرار حسب القالب (سنوي)</h3>
+      <table id="yearlyMoldTable"><thead><tr><th>رقم</th><th>عدد</th></tr></thead><tbody></tbody></table>
+      <h3>تفصيل الأضرار حسب نوع المشكلة</h3>
+      <table id="problemSummaryTable"><thead><tr><th>المشكلة</th><th>عدد</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- Libs -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-  <script>
-    let mainChart = null;
-    const congels = {
-      "048813": "CFH-MT260V4W",
-      "048752": "CFH-MT260V4G",
-      "039965": "CFH-MT26",
-      "048516": "CFH-T130V2G",
-      "050595": "KFV240W",
-      "035844": "CRD58V4W"
+<script>
+  /* Sidebar toggle */
+  function toggleSidebar(){
+    const bar=document.getElementById('mySidebar');
+    bar.style.width = bar.style.width === '250px' ? '0' : '250px';
+  }
+  function showSection(id){
+    document.querySelectorAll('.sectionPage').forEach(s=>s.style.display='none');
+    document.getElementById(id).style.display='block';
+    toggleSidebar();
+  }
+  function scrollToAnchor(id){setTimeout(()=>{document.getElementById(id)?.scrollIntoView({behavior:'smooth'});},300);}
+
+  /* Data logic (copied & adapted from previous versions) */
+  let mainChart=null;
+  const congels={"048813":"CFH-MT260V4W","048752":"CFH-MT260V4G","039965":"CFH-MT26","048516":"CFH-T130V2G","050595":"KFV240W","035844":"CRD58V4W"};
+  const imageData={};
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    const t=new Date();
+    document.getElementById('date').valueAsDate=t;
+    document.getElementById('time').value=t.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    drawChart();updateSummaryTables();updateProblemSummary();updateDailyProblemSummary();
+  });
+
+  function chercherCongelateur(){document.getElementById('freezerName').value=congels[document.getElementById('ean6').value]||'غير معروف';}
+  function previewImage(){
+    const f=document.getElementById('imageInput').files[0];const p=document.getElementById('imagePreviewContainer');
+    if(!f){p.style.display='none';return;}
+    const reader=new FileReader();
+    reader.onload=e=>{
+      p.innerHTML=`<img src="${e.target.result}" class="image-preview">`;p.style.display='block';
+    };reader.readAsDataURL(f);
+  }
+  function addRow(){
+    const body=document.querySelector('#logTable tbody');
+    const date=document.getElementById('date').value,time=document.getElementById('time').value,
+      period=document.getElementById('period').value,name=document.getElementById('freezerName').value||'غير معروف',
+      problem=document.getElementById('problem').value,mold=document.getElementById('moldNumber').value,
+      desc=document.getElementById('description').value,f=document.getElementById('imageInput');
+    const appendRow=(imgSrc)=>{
+      body.insertAdjacentHTML('beforeend',`<tr><td>${date}</td><td>${time}</td><td>${period}</td><td>${name}</td><td>${problem}</td><td>${mold}</td><td>${desc}</td><td>${imgSrc?'<img src="'+imgSrc+'" class="image-preview">':'لا يوجد'}</td></tr>`);
+      document.getElementById('description').value='';document.getElementById('imageInput').value='';document.getElementById('imagePreviewContainer').style.display='none';
+      drawChart();updateSummaryTables();updateProblemSummary();updateDailyProblemSummary();
     };
-    const imageData = {};
+    if(f.files.length>0){const reader=new FileReader();reader.onload=e=>{appendRow(e.target.result);};reader.readAsDataURL(f.files[0]);}
+    else appendRow(null);
+  }
 
-    document.addEventListener('DOMContentLoaded', function() {
-      const today = new Date();
-      document.getElementById('date').valueAsDate = today;
-      document.getElementById('time').value = today.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
-      drawChart();
-      updateSummaryTables();
-      updateProblemSummary();
-      setupNotifications();
+  function exportTable(type){
+    if(type==='excel'){
+      const clone=document.getElementById('logTable').cloneNode(true);
+      clone.querySelectorAll('img').forEach(i=>i.parentElement.innerHTML='نعم');
+      const blob=new Blob([clone.outerHTML],{type:'application/vnd.ms-excel'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(document.getElementById('filenameInput').value||'log')+'.xls';a.click();
+    }else{
+      downloadSectionAsPDF('logTable','log','p',true);
+    }
+  }
+
+  function drawChart(){
+    const ctx=document.getElementById('damageChart').getContext('2d');
+    if(mainChart) mainChart.destroy();
+    const counts={};document.querySelectorAll('#logTable tbody tr').forEach(r=>{const p=r.children[4].innerText;counts[p]=(counts[p]||0)+1;});
+    mainChart=new Chart(ctx,{type:document.getElementById('chartType').value,data:{labels:Object.keys(counts),datasets:[{label:'عدد',data:Object.values(counts),backgroundColor:Object.keys(counts).map(()=>'#'+Math.floor(Math.random()*16777215).toString(16))}]},options:{plugins:{legend:{rtl:true}}}});
+  }
+  function updateSummaryTables(){
+    const today=new Date(),ranges={daily:1,weekly:7,monthly:30,yearly:365},containers={daily:'dailyMoldTable',weekly:'weeklyMoldTable',monthly:'monthlyMoldTable',yearly:'yearlyMoldTable'};
+    const counts={daily:{1:0,2:0,3:0,4:0,5:0,6:0},weekly:{1:0,2:0,3:0,4:0,5:0,6:0},monthly:{1:0,2:0,3:0,4:0,5:0,6:0},yearly:{1:0,2:0,3:0,4:0,5:0,6:0}};
+    document.querySelectorAll('#logTable tbody tr').forEach(r=>{
+      const d=r.children[0].innerText,mold=r.children[5].innerText;if(!d)return;
+      const diff=(today-new Date(d))/(864e5);for(const [k,v] of Object.entries(ranges)){if(diff<=v)counts[k][mold]++;}
     });
+    for(const [k,id] of Object.entries(containers)){const b=document.querySelector('#'+id+' tbody');b.innerHTML='';for(let i=1;i<=6;i++){b.innerHTML+=`<tr><td>${i}</td><td>${counts[k][i]}</td></tr>`;}}
+  }
+  function updateProblemSummary(){
+    const counts={};document.querySelectorAll('#logTable tbody tr').forEach(r=>{const p=r.children[4].innerText;counts[p]=(counts[p]||0)+1;});
+    const tb=document.querySelector('#problemSummaryTable tbody');tb.innerHTML='';for(const [p,c] of Object.entries(counts)){tb.innerHTML+=`<tr><td>${p}</td><td>${c}</td></tr>`;}
+  }
+  function updateDailyProblemSummary(){
+    const dateKey=document.getElementById('loadDate').value||new Date().toISOString().split('T')[0];
+    const counts={};document.querySelectorAll('#logTable tbody tr').forEach(r=>{if(r.children[0].innerText===dateKey){const p=r.children[4].innerText;counts[p]=(counts[p]||0)+1;}});
+    const tb=document.querySelector('#dailyProblemTable tbody');tb.innerHTML='';for(const [p,c] of Object.entries(counts)){tb.innerHTML+=`<tr><td>${p}</td><td>${c}</td></tr>`;}
+  }
+  /* Save / Load */
+  function saveData(){const k=document.getElementById('loadDate').value;if(!k){alert('اختر تاريخ');return;}localStorage.setItem('log-'+k,document.querySelector('#logTable tbody').innerHTML);alert('تم الحفظ');}
+  function loadData(){const k=document.getElementById('loadDate').value;if(!k){alert('اختر تاريخ');return;}document.querySelector('#logTable tbody').innerHTML=localStorage.getItem('log-'+k)||'';drawChart();updateSummaryTables();updateProblemSummary();updateDailyProblemSummary();}
+  function clearTable(){if(confirm('محو الكل؟')){document.querySelector('#logTable tbody').innerHTML='';updateSummaryTables();updateProblemSummary();updateDailyProblemSummary();}}
 
-    function previewImage() {
-      const file = document.getElementById('imageInput').files[0];
-      const previewContainer = document.getElementById('imagePreviewContainer');
-      if (!file) {
-        previewContainer.classList.add('hidden');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        previewContainer.innerHTML = `<img src="${e.target.result}" class="image-preview">`;
-        previewContainer.classList.remove('hidden');
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function chercherCongelateur() {
-      const ean = document.getElementById("ean6").value;
-      document.getElementById("freezerName").value = congels[ean] || "غير معروف";
-    }
-
-    function addRow() {
-      const tableBody = document.querySelector("#logTable tbody");
-      const date = document.getElementById("date").value;
-      const time = document.getElementById("time").value;
-      const period = document.getElementById("period").value;
-      const name = document.getElementById("freezerName").value || "غير معروف";
-      const problem = document.getElementById("problem").value;
-      const mold = document.getElementById("moldNumber").value;
-      const desc = document.getElementById("description").value;
-      const fileInput = document.getElementById('imageInput');
-
-      if (fileInput.files.length > 0) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const imageId = 'img-' + Date.now();
-          imageData[imageId] = e.target.result;
-          tableBody.insertAdjacentHTML('beforeend', createTableRow(date, time, period, name, problem, mold, desc, imageId));
-          postAddRowActions();
-        };
-        reader.readAsDataURL(fileInput.files[0]);
-      } else {
-        tableBody.insertAdjacentHTML('beforeend', createTableRow(date, time, period, name, problem, mold, desc, null));
-        postAddRowActions();
-      }
-    }
-
-    function createTableRow(date, time, period, name, problem, mold, desc, imageId) {
-      const imageCell = imageId ? `<img src="${imageData[imageId]}" class="image-preview">` : 'لا يوجد';
-      return `
-      <tr>
-        <td>${date}</td>
-        <td>${time}</td>
-        <td>${period}</td>
-        <td>${name}</td>
-        <td>${problem}</td>
-        <td>${mold}</td>
-        <td>${desc}</td>
-        <td>${imageCell}</td>
-      </tr>`;
-    }
-
-    function postAddRowActions() {
-      document.getElementById('description').value = '';
-      document.getElementById('imageInput').value = '';
-      document.getElementById('imagePreviewContainer').classList.add('hidden');
-      drawChart();
-      updateSummaryTables();
-      updateProblemSummary();
-    }
-
-    function exportTable(type) {
-      if (type === 'excel') exportToExcel();
-    }
-
-    function exportToExcel() {
-      const tableClone = document.getElementById('logTable').cloneNode(true);
-      tableClone.querySelectorAll('img').forEach(img => img.parentElement.innerHTML = 'نعم');
-      const blob = new Blob([tableClone.outerHTML], {type:'application/vnd.ms-excel'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = getFileName('log') + '.xls';
-      a.click();
-    }
-
-    function drawChart() {
-      const ctx = document.getElementById('damageChart').getContext('2d');
-      if (mainChart) mainChart.destroy();
-      const counts = {};
-      document.querySelectorAll('#logTable tbody tr').forEach(row => {
-        const prob = row.children[4].innerText;
-        counts[prob] = (counts[prob] || 0) + 1;
-      });
-      const labels = Object.keys(counts);
-      const dataVals = Object.values(counts);
-      mainChart = new Chart(ctx, {
-        type: document.getElementById('chartType').value,
-        data: {
-          labels: labels,
-          datasets: [{
-            label: 'عدد الحالات',
-            data: dataVals,
-            backgroundColor: labels.map(() => '#' + Math.floor(Math.random()*16777215).toString(16))
-          }]
-        },
-        options: {responsive:true,plugins:{legend:{position:'top',rtl:true}}}
-      });
-    }
-
-    function updateSummaryTables() {
-      const today = new Date();
-      const ranges = {daily:1, weekly:7, monthly:30, yearly:365};
-      const containers = {daily:'dailyMoldTable', weekly:'weeklyMoldTable', monthly:'monthlyMoldTable', yearly:'yearlyMoldTable'};
-      const counts = {
-        daily: {1:0,2:0,3:0,4:0,5:0,6:0},
-        weekly: {1:0,2:0,3:0,4:0,5:0,6:0},
-        monthly: {1:0,2:0,3:0,4:0,5:0,6:0},
-        yearly: {1:0,2:0,3:0,4:0,5:0,6:0}
-      };
-      document.querySelectorAll('#logTable tbody tr').forEach(row => {
-        const dateStr = row.children[0].innerText;
-        const mold = row.children[5].innerText;
-        if(!dateStr||!mold) return;
-        const diffDays = (today - new Date(dateStr)) / (1000*60*60*24);
-        for(const [key,days] of Object.entries(ranges)) {
-          if(diffDays<=days) counts[key][mold]++;
-        }
-      });
-      for(const [key,tableId] of Object.entries(containers)) {
-        const body = document.querySelector(`#${tableId} tbody`);
-        body.innerHTML='';
-        for(let i=1;i<=6;i++) body.innerHTML += `<tr><td>${i}</td><td>${counts[key][i]}</td></tr>`;
-      }
-    }
-
-    function updateProblemSummary() {
-      const counts = {};
-      document.querySelectorAll('#logTable tbody tr').forEach(r=>{
-        const p=r.children[4].innerText;
-        counts[p]=(counts[p]||0)+1;
-      });
-      const tbody=document.querySelector('#problemSummaryTable tbody');
-      tbody.innerHTML='';
-      for(const [p,c] of Object.entries(counts)){
-        tbody.innerHTML+=`<tr><td>${p}</td><td>${c}</td></tr>`;
-      }
-    }
-
-    function clearTable() {
-      if(confirm('هل أنت متأكد من محو جميع البيانات؟')){
-        document.querySelector('#logTable tbody').innerHTML='';
-        updateSummaryTables();updateProblemSummary();drawChart();
-      }
-    }
-
-    function clearSummary() {
-      if(confirm('هل تريد محو جداول القوالب الملخصة؟')){
-        document.querySelectorAll('#summaryDetails tbody, #problemSummaryTable tbody').forEach(tb=>tb.innerHTML='');
-        drawChart();
-      }
-    }
-
-    function getFileName(defaultName){
-      const input=document.getElementById('filenameInput');
-      return(input&&input.value.trim())||defaultName;
-    }
-
-    function downloadSectionAsJPG(id,filename){
-      html2canvas(document.getElementById(id)).then(canvas=>{
-        const a=document.createElement('a');
-        a.download=filename+'.jpg';
-        a.href=canvas.toDataURL('image/jpeg',1.0);
-        a.click();
-      });
-    }
-
-    function setupNotifications(){
-      if(!('Notification' in window)) return;
-      Notification.requestPermission();
-      setInterval(checkAndNotify,60000);
-    }
-
-    function checkAndNotify(){
-      const now=new Date();
-      const h=now.getHours(), m=now.getMinutes();
-      if(h===16&&m===25) showNotification('انتهت الفترة الصباحية، حمّل التقرير اليومي!');
-      if(h===0&&m===25) showNotification('انتهت الفترة المسائية، حمّل التقرير اليومي!');
-      if(now.getDay()===6&&h===23&&m===59) showNotification('انتهى الأسبوع، لا تنسَ التقرير الأسبوعي!');
-      const lastDay=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
-      if(now.getDate()===lastDay&&h===23&&m===59) showNotification('انتهى الشهر، قم بتقرير الشهري!');
-      if(now.getMonth()===11&&now.getDate()===31&&h===23&&m===59) showNotification('انتهت السنة، حمّل التقرير السنوي!');
-    }
-
-    function showNotification(msg){
-      if(Notification.permission==='granted') new Notification(msg);
-      else alert(msg);
-    }
-  
-    function downloadSectionAsPDF(id, filename){
-      const element = document.getElementById(id);
-      html2canvas(element).then(canvas=>{
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jspdf.jsPDF('l', 'pt', [canvas.width, canvas.height]);
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-        pdf.save(filename + '.pdf');
-      });
-    }
+  /* PDF helpers (from v8) */
+  function downloadSectionAsPDF(id,name,orientation='p',header=false){
+    const el=document.getElementById(id);
+    html2canvas(el,{scale:2,useCORS:true}).then(canvas=>{
+      const img=canvas.toDataURL('image/jpeg',1.0);
+      const {jsPDF}=window.jspdf;const pdf=new jsPDF(orientation,'mm','a4',true);
+      const pdfW=orientation==='l'?pdf.internal.pageSize.getHeight():pdf.internal.pageSize.getWidth();
+      const pdfH=pdf.internal.pageSize.getHeight();
+      if(header)addHeaderFooter(pdf);
+      pdf.addImage(img,'JPEG',25,30,pdfW-50,pdfH-50);
+      pdf.save(name+'.pdf');
+    });
+  }
+  function addHeaderFooter(pdf){
+    const w=pdf.internal.pageSize.getWidth(),h=pdf.internal.pageSize.getHeight();
+    pdf.setFontSize(12);pdf.text('Contrôle Qualité',w-10,15,{align:'right'});
+    pdf.text('Visa Superviseur Qualité',10,h-10);pdf.text('Visa Agent Qualité',w-10,h-10,{align:'right'});
+    pdf.setDrawColor(100);pdf.rect(20,25,w-40,h-50);
+  }
+  function exportSummaryCombinedPDF(){downloadSectionAsPDF('summarySection','ملخص_الأضرار','p',true);}
 </script>
 </body>
 </html>

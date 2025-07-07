@@ -55,9 +55,7 @@
   <a href="#" onclick="showSection('entrySection')">ادخال مشكلة جديدة</a>
   <a href="#" onclick="showSection('dateSection')">التقارير حسب التاريخ</a>
   <a href="#" onclick="showSection('summarySection');scrollToAnchor('dailyReportTitle')">التقرير اليومي</a>
-  <a href="#" onclick="showSection('summarySection');scrollToAnchor('weeklyMoldTable')">التقرير الأسبوعي</a>
-  <a href="#" onclick="showSection('summarySection');scrollToAnchor('monthlyMoldTable')">التقرير الشهري</a>
-  <a href="#" onclick="showSection('summarySection');scrollToAnchor('yearlyMoldTable')">التقرير السنوي</a>
+
 </div>
 
 <!-- إدخال مشكلة جديدة -->
@@ -83,7 +81,7 @@
       <option value="مشاكل أخرى">مشاكل أخرى</option>
     </select>
     <label>رقم القالب:</label>
-    <select id="moldNumber"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
+    <select id="moldNumber"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>لا يتعلق بالقالب</option></select>
     <br>
     <label>وصف المشكلة:</label>
     <textarea id="description" rows="2"></textarea>
@@ -112,6 +110,7 @@
     <input type="text" id="filenameInput" placeholder="اسم الملف">
     <button onclick="exportTable('pdf')">PDF تحميل</button>
     <button onclick="exportTable('excel')">Excel تحميل</button>
+    <button onclick="exportOBB()">حفظ كل البيانات في ملف OBB</button>
     <br>
     <table id="logTable" style="width:85%;margin:auto;">
       <thead><tr>
@@ -138,12 +137,6 @@
       <table id="dailyProblemTable"><thead><tr><th>المشكلة</th><th>عدد (اليوم)</th></tr></thead><tbody></tbody></table>
       <h3>تفصيل الأضرار حسب القالب (يومي)</h3>
       <table id="dailyMoldTable"><thead><tr><th>رقم</th><th>عدد</th></tr></thead><tbody></tbody></table>
-      <h3>تفصيل الأضرار حسب القالب (أسبوعي)</h3>
-      <table id="weeklyMoldTable"><thead><tr><th>رقم</th><th>عدد</th></tr></thead><tbody></tbody></table>
-      <h3>تفصيل الأضرار حسب القالب (شهري)</h3>
-      <table id="monthlyMoldTable"><thead><tr><th>رقم</th><th>عدد</th></tr></thead><tbody></tbody></table>
-      <h3>تفصيل الأضرار حسب القالب (سنوي)</h3>
-      <table id="yearlyMoldTable"><thead><tr><th>رقم</th><th>عدد</th></tr></thead><tbody></tbody></table>
       <h3>تفصيل الأضرار حسب نوع المشكلة</h3>
       <table id="problemSummaryTable"><thead><tr><th>المشكلة</th><th>عدد</th></tr></thead><tbody></tbody></table>
     </div>
@@ -151,9 +144,75 @@
 </div>
 
 <!-- Libs -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js">
+/* Export all logs to OBB */
+function exportOBB(){
+  const allLogs = {};
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k.startsWith('log-')){
+      allLogs[k] = localStorage.getItem(k);
+    }
+  }
+  if(Object.keys(allLogs).length===0){
+    alert('لا توجد بيانات محفوظة بعد');
+    return;
+  }
+  const blob = new Blob([JSON.stringify(allLogs)], {type:'application/octet-stream'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'freezer_logs.obb';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+/* Export all logs to OBB */
+function exportOBB(){
+  const allLogs = {};
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k.startsWith('log-')){
+      allLogs[k] = localStorage.getItem(k);
+    }
+  }
+  if(Object.keys(allLogs).length===0){
+    alert('لا توجد بيانات محفوظة بعد');
+    return;
+  }
+  const blob = new Blob([JSON.stringify(allLogs)], {type:'application/octet-stream'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'freezer_logs.obb';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+/* Export all logs to OBB */
+function exportOBB(){
+  const allLogs = {};
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k.startsWith('log-')){
+      allLogs[k] = localStorage.getItem(k);
+    }
+  }
+  if(Object.keys(allLogs).length===0){
+    alert('لا توجد بيانات محفوظة بعد');
+    return;
+  }
+  const blob = new Blob([JSON.stringify(allLogs)], {type:'application/octet-stream'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'freezer_logs.obb';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+</script>
 
 <script>
   /* Sidebar toggle */
@@ -222,14 +281,24 @@
     mainChart=new Chart(ctx,{type:document.getElementById('chartType').value,data:{labels:Object.keys(counts),datasets:[{label:'عدد',data:Object.values(counts),backgroundColor:Object.keys(counts).map(()=>'#'+Math.floor(Math.random()*16777215).toString(16))}]},options:{plugins:{legend:{rtl:true}}}});
   }
   function updateSummaryTables(){
-    const today=new Date(),ranges={daily:1,weekly:7,monthly:30,yearly:365},containers={daily:'dailyMoldTable',weekly:'weeklyMoldTable',monthly:'monthlyMoldTable',yearly:'yearlyMoldTable'};
-    const counts={daily:{1:0,2:0,3:0,4:0,5:0,6:0},weekly:{1:0,2:0,3:0,4:0,5:0,6:0},monthly:{1:0,2:0,3:0,4:0,5:0,6:0},yearly:{1:0,2:0,3:0,4:0,5:0,6:0}};
-    document.querySelectorAll('#logTable tbody tr').forEach(r=>{
-      const d=r.children[0].innerText,mold=r.children[5].innerText;if(!d)return;
-      const diff=(today-new Date(d))/(864e5);for(const [k,v] of Object.entries(ranges)){if(diff<=v)counts[k][mold]++;}
-    });
-    for(const [k,id] of Object.entries(containers)){const b=document.querySelector('#'+id+' tbody');b.innerHTML='';for(let i=1;i<=6;i++){b.innerHTML+=`<tr><td>${i}</td><td>${counts[k][i]}</td></tr>`;}}
+  const today=new Date();
+  const counts={};
+  document.querySelectorAll('#logTable tbody tr').forEach(r=>{
+    const d=r.children[0].innerText;
+    if(!d) return;
+    const diff=(today - new Date(d))/(864e5);
+    if(diff<=1){
+      const mold=r.children[5].innerText || 'غير محدد';
+      counts[mold]=(counts[mold]||0)+1;
+    }
+  });
+  const tbody=document.querySelector('#dailyMoldTable tbody');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  for(const [m,c] of Object.entries(counts)){
+    tbody.innerHTML+=`<tr><td>${m}</td><td>${c}</td></tr>`;
   }
+}
   function updateProblemSummary(){
     const counts={};document.querySelectorAll('#logTable tbody tr').forEach(r=>{const p=r.children[4].innerText;counts[p]=(counts[p]||0)+1;});
     const tb=document.querySelector('#problemSummaryTable tbody');tb.innerHTML='';for(const [p,c] of Object.entries(counts)){tb.innerHTML+=`<tr><td>${p}</td><td>${c}</td></tr>`;}
@@ -264,6 +333,28 @@
     pdf.setDrawColor(100);pdf.rect(20,25,w-40,h-50);
   }
   function exportSummaryCombinedPDF(){downloadSectionAsPDF('summarySection','ملخص_الأضرار','p',true);}
+
+/* Export all logs to OBB */
+function exportOBB(){
+  const allLogs = {};
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k.startsWith('log-')){
+      allLogs[k] = localStorage.getItem(k);
+    }
+  }
+  if(Object.keys(allLogs).length===0){
+    alert('لا توجد بيانات محفوظة بعد');
+    return;
+  }
+  const blob = new Blob([JSON.stringify(allLogs)], {type:'application/octet-stream'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'freezer_logs.obb';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 </script>
 </body>
 </html>

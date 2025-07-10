@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<title>نظام مراقبة الفريزرات – v10</title>
+<style>
+  :root{
+    --bg:#2f3640;
+    --section-bg:#353b48;
+    --table-bg:#2d3436;
+    --border:#636e72;
+    --text:#ecf0f1;
+    --accent:#00cec9;
+  }
+  *{box-sizing:border-box;font-family:'Arial',sans-serif;}
+  body{margin:0;background:var(--bg);color:var(--text);}
+  /* Sidebar */
+  .sidebar{
+    height:100%;width:0;position:fixed;z-index:3;top:0;right:0;
+    background:#111;overflow-x:hidden;transition:0.3s;padding-top:60px;
+  }
+  .sidebar a{
+    display:block;padding:10px 30px;font-size:18px;color:#f1f1f1;text-decoration:none;
+  }
+  .sidebar a:hover{background:#575757;}
+  .sidebar .closebtn{position:absolute;top:0;right:25px;font-size:36px;}
+  .openbtn{
+    font-size:30px;cursor:pointer;color:#fff;position:fixed;top:15px;right:15px;z-index:4;
+  }
+  /* Sections */
+  .sectionPage{display:none;padding:80px 20px;}
+  .section{background:var(--section-bg);padding:20px;border-radius:8px;margin-bottom:20px;}
+  /* Inputs */
+  input,select,textarea,button{
+    padding:8px;margin:5px;border-radius:4px;border:1px solid var(--border);
+    background:var(--table-bg);color:var(--text);
+  }
+  button{cursor:pointer;background:var(--accent);color:#000;font-weight:bold;}
+  /* Table */
+  table{width:100%;border-collapse:collapse;background:var(--table-bg);font-size:14px;}
+  th,td{border:1px solid #555;padding:8px;text-align:center;color:#fff;}
+  th{background:var(--border);}
+  .image-preview{max-width:150px;max-height:120px;object-fit:contain;display:block;margin:auto;border:1px solid #ccc;border-radius:4px;box-shadow:0 0 5px rgba(0,0,0,0.4);}
+  canvas{max-width:100%;margin-top:20px;}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</head>
+<body>
+<!-- Hamburger -->
+<span class="openbtn" onclick="toggleSidebar()">☰</span>
+<!-- Sidebar -->
+<div class="sidebar" id="mySidebar">
+<a class="closebtn" href="javascript:void(0)" onclick="toggleSidebar()">×</a>
+<a href="#" onclick="showSection('entrySection')">ادخال مشكلة جديدة</a>
+<a href="#" onclick="showSection('rejectedSection')">قائمة المجمدة التالفة</a>
+<a href="#" onclick="showSection('dateSection')">التقارير حسب التاريخ</a>
+<a href="#" onclick="showSection('summarySection');scrollToAnchor('dailyReportTitle')">التقرير اليومي</a>
+</div>
+
+<!-- واجهة رئيسية تظهر الصورة فقط هنا -->
+<style>
+  @media (max-width: 768px) {
+    #heroSection h1 { font-size: 24px; }
+    #heroSection p { font-size: 14px; }
+    #heroSection button { font-size: 16px; padding: 10px 20px; }
+    #mainMenu button { font-size: 16px; padding: 10px 20px; }
+  }
+</style>
+<div id="heroSection" style="background-image: url('https://cdn.pixabay.com/photo/2013/07/12/18/20/freezer-153810_960_720.png'); background-size: cover; background-position: center;
+            height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; color: white; text-shadow: 1px 1px 5px black;">
+  <div style="max-width: 90%; text-align: center; background-color: rgba(0,0,0,0.4); padding: 20px; border-radius: 10px;">
+    <h1 style="font-size: 36px; margin-bottom: 10px;">مرحبًا بك في نظام مراقبة الفريزرات</h1>
+    <p style="font-size: 16px; line-height: 1.6;">سجل وتابع كل مشاكل التصنيع وجودة الفريزرات في مصنعك بسهولة تامة.</p>
+    <button onclick="openMainMenu()" style="margin-top: 20px; padding: 12px 25px; background: #00cec9; border: none; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 6px;">ابدأ الآن</button>
+  </div>
+</div>
+
+<!-- القائمة الرئيسية بدون صورة خلفية -->
+<div id="mainMenu" style="display:none; min-height: 100vh; background: #2f3640; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 20px;">
+  <h2 style="font-size: 28px;">اختر القسم:</h2>
+  <button onclick="navigateTo('entrySection')" style="padding: 12px 30px; background: #00cec9; border: none; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 6px;">مشكلة جديدة</button>
+  <button onclick="navigateTo('rejectedSection')" style="padding: 12px 30px; background: #00cec9; border: none; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 6px;">المجمدة التالفة</button>
+  <button onclick="navigateTo('dateSection')" style="padding: 12px 30px; background: #00cec9; border: none; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 6px;">التقارير حسب التاريخ</button>
+  <button onclick="navigateTo('summarySection')" style="padding: 12px 30px; background: #00cec9; border: none; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 6px;">ملخص الأضرار</button>
+</div>
+
+<script>
+  function openMainMenu() {
+    document.getElementById('heroSection').style.display = 'none';
+    document.getElementById('mainMenu').style.display = 'flex';
+  }
+  function navigateTo(sectionId) {
+    document.querySelectorAll('.sectionPage').forEach(s => s.style.display = 'none');
+    document.getElementById(sectionId).style.display = 'block';
+    document.getElementById('mainMenu').style.display = 'none';
+    showBackButton();
+  }
+  function showBackButton() {
+    if (!document.getElementById('backButton')) {
+      const btn = document.createElement('button');
+      btn.innerText = '⬅ رجوع';
+      btn.id = 'backButton';
+      btn.style = 'position: fixed; top: 20px; left: 20px; padding: 10px 20px; background: #00cec9; border: none; font-weight: bold; cursor: pointer; border-radius: 6px; z-index: 5;';
+      btn.onclick = () => {
+        document.querySelectorAll('.sectionPage').forEach(s => s.style.display = 'none');
+        document.getElementById('mainMenu').style.display = 'flex';
+        btn.remove();
+      };
+      document.body.appendChild(btn);
+    }
+  }
+</script>
+
+<!-- إدخال مشكلة جديدة -->
+<div class="sectionPage" id="entrySection" style="display:block;">
+<div class="section">
+<h2>إدخال مشكلة جديدة</h2>
+<label>اسم الفريزر:</label>
+<select id="freezerName">
+  <option value="RFDK510G">RFDK510G</option>
+  <option value="CFH140A">CFH140A</option>
+  <option value="CFH-MT26">CFH-MT26</option>
+  <option value="CFH-MT260V4G">CFH-MT260V4G</option>
+  <option value="CFH-MT260V4W">CFH-MT260V4W</option>
+  <option value="CFH-MT26G">CFH-MT26G</option>
+  <option value="CFH-T130V2G">CFH-T130V2G</option>
+  <option value="CFH-T130V2W">CFH-T130V2W</option>
+  <option value="CFH-T13GM03">CFH-T13GM03</option>
+  <option value="CFH-T19GM04">CFH-T19GM04</option>
+  <option value="CFH-T390V1G">CFH-T390V1G</option>
+  <option value="CFH-T390V1W">CFH-T390V1W</option>
+  <option value="CFH-T390V2G">CFH-T390V2G</option>
+  <option value="CFH-T390V2W">CFH-T390V2W</option>
+  <option value="CFH-T39GM05">CFH-T39GM05</option>
+  <option value="CFH-T39GM05G">CFH-T39GM05G</option>
+  <option value="CFH-T450V2G">CFH-T450V2G</option>
+  <option value="CFH-T450V2W">CFH-T450V2W</option>
+  <option value="CFH-T45GM10">CFH-T45GM10</option>
+  <option value="CRD45V4G">CRD45V4G</option>
+  <option value="CRD45V4N">CRD45V4N</option>
+  <option value="CRD45V4W">CRD45V4W</option>
+  <option value="CRD45V4X">CRD45V4X</option>
+  <option value="CRD58V4G">CRD58V4G</option>
+  <option value="CRD58V4W">CRD58V4W</option>
+  <option value="CRD58V4X">CRD58V4X</option>
+  <option value="CRD65V4G">CRD65V4G</option>
+  <option value="CRD65V4W">CRD65V4W</option>
+  <option value="CRD65V4X">CRD65V4X</option>
+  <option value="CRF-T12GM7">CRF-T12GM7</option>
+  <option value="CRF-T12GM7N">CRF-T12GM7N</option>
+  <option value="CRF-T36GH07">CRF-T36GH07</option>
+  <option value="CRF-T36GH07-G">CRF-T36GH07-G</option>
+  <option value="FH-CR280V1G">FH-CR280V1G</option>
+  <option value="FH-CR280V1W">FH-CR280V1W</option>
+  <option value="FH-CR280V3G">FH-CR280V3G</option>
+  <option value="FH-CR280V3W">FH-CR280V3W</option>
+  <option value="FH-CR380G">FH-CR380G</option>
+  <option value="FH-CR380V2G">FH-CR380V2G</option>
+  <option value="FH-CR380V2W">FH-CR380V2W</option>
+  <option value="FH-CR380W">FH-CR380W</option>
+  <option value="KFV240W">KFV240W</option>
+</select>
+<br/>
+<label>المشكلة:</label>
+<select id="problem"><option value="خدوش أو انبعاجات أثناء النقل">خدوش أو انبعاجات أثناء النقل</option><option value="إمالة الهيكل أثناء النقل">إمالة الهيكل أثناء النقل</option><option value="توزيع غير متساو للرغوة">توزيع غير متساو للرغوة</option><option value="فراغات أو تجاويف في الرغوة">فراغات أو تجاويف في الرغوة</option><option value="تشوهات في الهيكل">تشوهات في الهيكل</option><option value="رغوة زائدة أو تسرب">رغوة زائدة أو تسرب</option><option value="رائحة كيميائية قوية">رائحة كيميائية قوية</option><option value="تكثف داخلي أو تأكل">تكثف داخلي أو تأكل</option><option value="مشاكل القالب الداخلي">مشاكل القالب الداخلي</option><option value="مشاكل القالب الخارجي">مشاكل القالب الخارجي</option><option value="مشاكل الإطار البلاستيكي">مشاكل الإطار البلاستيكي</option><option value="مشاكل اخرى">مشاكل اخرى</option></select>
+<label>رقم القالب:</label>
+<select id="moldNumber"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>لا يتعلق بالقالب</option></select>
+<br/>
+<label>وصف المشكلة:</label>
+<textarea id="description" rows="2"></textarea>
+<br/>
+<label>صورة:</label>
+<input accept="image/*" capture="environment" id="imageInput" onchange="previewImage()" type="file"/>
+<div id="imagePreviewContainer" style="display:none;"></div>
+<br/>
+<label>التاريخ:</label><input id="date" type="date"/>
+<label>الوقت:</label><input id="time" type="time"/>
+<label>الفترة:</label>
+<select id="period"><option value="صباحية">صباحية</option><option value="مسائية">مسائية</option></select>
+<br/>
+<button onclick="addRow()">إضافة للسجل</button>
+</div>
+</div>
+
+<!-- قائمة المجمدة التالفة -->
+<div class="sectionPage" id="rejectedSection">
+<div class="section">
+<h2>قائمة المجمدة التالفة (produit rebuté)</h2>
+<label>اسم الفريزر:</label>
+<select id="rejectedFreezerName">
+  <option value="RFDK510G">RFDK510G</option>
+  <option value="CFH140A">CFH140A</option>
+  <option value="CFH-MT26">CFH-MT26</option>
+  <option value="CFH-MT260V4G">CFH-MT260V4G</option>
+  <option value="CFH-MT260V4W">CFH-MT260V4W</option>
+  <option value="CFH-MT26G">CFH-MT26G</option>
+  <option value="CFH-T130V2G">CFH-T130V2G</option>
+  <option value="CFH-T130V2W">CFH-T130V2W</option>
+  <option value="CFH-T13GM03">CFH-T13GM03</option>
+  <option value="CFH-T19GM04">CFH-T19GM04</option>
+  <option value="CFH-T390V1G">CFH-T390V1G</option>
+  <option value="CFH-T390V1W">CFH-T390V1W</option>
+  <option value="CFH-T390V2G">CFH-T390V2G</option>
+  <option value="CFH-T390V2W">CFH-T390V2W</option>
+  <option value="CFH-T39GM05">CFH-T39GM05</option>
+  <option value="CFH-T39GM05G">CFH-T39GM05G</option>
+  <option value="CFH-T450V2G">CFH-T450V2G</option>
+  <option value="CFH-T450V2W">CFH-T450V2W</option>
+  <option value="CFH-T45GM10">CFH-T45GM10</option>
+  <option value="CRD45V4G">CRD45V4G</option>
+  <option value="CRD45V4N">CRD45V4N</option>
+  <option value="CRD45V4W">CRD45V4W</option>
+  <option value="CRD45V4X">CRD45V4X</option>
+  <option value="CRD58V4G">CRD58V4G</option>
+  <option value="CRD58V4W">CRD58V4W</option>
+  <option value="CRD58V4X">CRD58V4X</option>
+  <option value="CRD65V4G">CRD65V4G</option>
+  <option value="CRD65V4W">CRD65V4W</option>
+  <option value="CRD65V4X">CRD65V4X</option>
+  <option value="CRF-T12GM7">CRF-T12GM7</option>
+  <option value="CRF-T12GM7N">CRF-T12GM7N</option>
+  <option value="CRF-T36GH07">CRF-T36GH07</option>
+  <option value="CRF-T36GH07-G">CRF-T36GH07-G</option>
+  <option value="FH-CR280V1G">FH-CR280V1G</option>
+  <option value="FH-CR280V1W">FH-CR280V1W</option>
+  <option value="FH-CR280V3G">FH-CR280V3G</option>
+  <option value="FH-CR280V3W">FH-CR280V3W</option>
+  <option value="FH-CR380G">FH-CR380G</option>
+  <option value="FH-CR380V2G">FH-CR380V2G</option>
+  <option value="FH-CR380V2W">FH-CR380V2W</option>
+  <option value="FH-CR380W">FH-CR380W</option>
+  <option value="KFV240W">KFV240W</option>
+</select>
+<br/>
+<label>نوع التلف:</label>
+<textarea id="rejectedDescription" rows="2"></textarea>
+<br/>
+<label>صورة التلف:</label>
+<input accept="image/*" capture="environment" id="rejectedImageInput" onchange="previewRejectedImage()" type="file"/>
+<div id="rejectedImagePreviewContainer" style="display:none;"></div>
+<br/>
+<label>التاريخ:</label><input id="rejectedDate" type="date"/>
+<label>الوقت:</label><input id="rejectedTime" type="time"/>
+<br/>
+<button onclick="addRejectedRow()">إضافة للسجل</button>
+</div>
+
+<div class="section">
+<h2>سجل المجمدة التالفة</h2>
+<label>تاريخ السجل:</label><input id="loadRejectedDate" type="date"/>
+<button onclick="loadRejectedData()">عرض</button>
+<button onclick="saveRejectedData()">حفظ بيانات هذا التاريخ</button>
+<button onclick="clearRejectedTable()">محو الجدول</button>
+<input id="rejectedFilenameInput" placeholder="اسم الملف" type="text"/>
+<button onclick="exportRejectedTable('pdf')">PDF تحميل</button>
+<button onclick="exportRejectedTable('excel')">Excel تحميل</button>
+<br/>
+<table id="rejectedTable" style="width:85%;margin:auto;">
+<thead><tr>
+<th>التاريخ</th><th>الوقت</th><th>اسم الفريزر</th>
+<th>نوع التلف</th><th>الصورة</th>
+</tr></thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+
+<!-- التقارير حسب التاريخ (جدول السجل) -->
+<div class="sectionPage" id="dateSection">
+<div class="section">
+<h2>التقارير حسب التاريخ</h2>
+<label>تاريخ السجل:</label><input id="loadDate" type="date"/>
+<button onclick="loadData()">عرض</button>
+<button onclick="saveData()">حفظ بيانات هذا التاريخ</button>
+<button onclick="clearTable()">محو الجدول</button>
+<input id="filenameInput" placeholder="اسم الملف" type="text"/>
+<button onclick="exportTable('pdf')">PDF تحميل</button>
+<button onclick="exportTable('excel')">Excel تحميل</button>
+<br/>
+<table id="logTable" style="width:85%;margin:auto;">
+<thead><tr>
+<th>التاريخ</th><th>الوقت</th><th>الفترة</th><th>اسم الفريزر</th>
+<th>المشكلة</th><th>رقم القالب</th><th>وصف</th><th>الصورة</th>
+</tr></thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+<!-- ملخص الأضرار -->
+<div class="sectionPage" id="summarySection">
+<div class="section">
+<h2>ملخص الأضرار</h2>
+<select id="chartType" onchange="drawChart()">
+<option value="bar">عمودي</option><option value="pie">دائري</option><option value="line">خطي</option>
+</select>
+<canvas height="200" id="damageChart"></canvas>
+<br/>
+<button onclick="exportSummaryCombinedPDF()">تحميل ملخص PDF</button>
+<div id="summaryDetails">
+<h3 id="dailyReportTitle">التقرير اليومي</h3>
+<table id="dailyProblemTable"><thead><tr><th>المشكلة</th><th>عدد (اليوم)</th></tr></thead><tbody></tbody></table>
+<h3>تفصيل الأضرار حسب القالب (يومي)</h3>
+<table id="dailyMoldTable"><thead><tr><th>رقم</th><th>عدد</th></tr></thead><tbody></tbody></table>
+<h3>تفصيل الأضرار حسب نوع المشكلة</h3>
+<table id="problemSummaryTable"><thead><tr><th>المشكلة</th><th>عدد</th></tr></thead><tbody></tbody></table>
+</div>
+</div>
+</div>
+<!-- Libs -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  /* Sidebar toggle */
+  function toggleSidebar(){
+    const bar=document.getElementById('mySidebar');
+    bar.style.width = bar.style.width === '250px' ? '0' : '250px';
+  }
+  function showSection(id){
+    document.querySelectorAll('.sectionPage').forEach(s=>s.style.display='none');
+    document.getElementById(id).style.display='block';
+    toggleSidebar();
+  }
+  function scrollToAnchor(id){setTimeout(()=>{document.getElementById(id)?.scrollIntoView({behavior:'smooth'});},300);}
+
+  /* Data logic (copied & adapted from previous versions) */
+  let mainChart=null;
+  const imageData={};
+
+  document.addEventListener('DOMContentLoaded',()=>{
+    const t=new Date();
+    document.getElementById('date').valueAsDate=t;
+    document.getElementById('time').value=t.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('rejectedDate').valueAsDate=t;
+    document.getElementById('rejectedTime').value=t.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+    drawChart();updateSummaryTables();updateProblemSummary();updateDailyProblemSummary();
+  });
+
+  function previewImage(){
+    const f=document.getElementById('imageInput').files[0];const p=document.getElementById('imagePreviewContainer');
+    if(!f){p.style.display='none';return;}
+    const reader=new FileReader();
+    reader.onload=e=>{
+      p.innerHTML=`<img src="${e.target.result}" class="image-preview">`;p.style.display='block';
+    };reader.readAsDataURL(f);
+  }
+  
+  function previewRejectedImage(){
+    const f=document.getElementById('rejectedImageInput').files[0];const p=document.getElementById('rejectedImagePreviewContainer');
+    if(!f){p.style.display='none';return;}
+    const reader=new FileReader();
+    reader.onload=e=>{
+      p.innerHTML=`<img src="${e.target.result}" class="image-preview">`;p.style.display='block';
+    };reader.readAsDataURL(f);
+  }
+  
+  function addRow(){
+    const body=document.querySelector('#logTable tbody');
+    const date=document.getElementById('date').value,time=document.getElementById('time').value,
+      period=document.getElementById('period').value,name=document.getElementById('freezerName').value||'غير معروف',
+      problem=document.getElementById('problem').value,mold=document.getElementById('moldNumber').value,
+      desc=document.getElementById('description').value,f=document.getElementById('imageInput');
+    const appendRow=(imgSrc)=>{
+      body.insertAdjacentHTML('beforeend',`<tr><td>${date}</td><td>${time}</td><td>${period}</td><td>${name}</td><td>${problem}</td><td>${mold}</td><td>${desc}</td><td>${imgSrc?'<img src="'+imgSrc+'" class="image-preview">':'لا يوجد'}</td></tr>`);
+      document.getElementById('description').value='';document.getElementById('imageInput').value='';document.getElementById('imagePreviewContainer').style.display='none';
+      drawChart();updateSummaryTables();updateProblemSummary();updateDailyProblemSummary();
+    };
+    if(f.files.length>0){const reader=new FileReader();reader.onload=e=>{appendRow(e.target.result);};reader.readAsDataURL(f.files[0]);}
+    else appendRow(null);
+  }
+  
+  function addRejectedRow(){
+    const body=document.querySelector('#rejectedTable tbody');
+    const date=document.getElementById('rejectedDate').value,time=document.getElementById('rejectedTime').value,
+      name=document.getElementById('rejectedFreezerName').value||'غير معروف',
+      desc=document.getElementById('rejectedDescription').value,f=document.getElementById('rejectedImageInput');
+    const appendRow=(imgSrc)=>{
+      body.insertAdjacentHTML('beforeend',`<tr><td>${date}</td><td>${time}</td><td>${name}</td><td>${desc}</td><td>${imgSrc?'<img src="'+imgSrc+'" class="image-preview">':'لا يوجد'}</td></tr>`);
+      document.getElementById('rejectedDescription').value='';document.getElementById('rejectedImageInput').value='';document.getElementById('rejectedImagePreviewContainer').style.display='none';
+    };
+    if(f.files.length>0){const reader=new FileReader();reader.onload=e=>{appendRow(e.target.result);};reader.readAsDataURL(f.files[0]);}
+    else appendRow(null);
+  }
+
+  function exportTable(type){
+    if(type==='excel'){
+      const clone=document.getElementById('logTable').cloneNode(true);
+      clone.querySelectorAll('img').forEach(i=>i.parentElement.innerHTML='نعم');
+      const blob=new Blob([clone.outerHTML],{type:'application/vnd.ms-excel'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);saveAs(blob, (document.getElementById('filenameInput').value||'log')+'.xls');
+    }else{
+      downloadSectionAsPDF('logTable','log','p',true);
+    }
+  }
+  
+  function exportRejectedTable(type){
+    if(type==='excel'){
+      const clone=document.getElementById('rejectedTable').cloneNode(true);
+      clone.querySelectorAll('img').forEach(i=>i.parentElement.innerHTML='نعم');
+      const blob=new Blob([clone.outerHTML],{type:'application/vnd.ms-excel'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);saveAs(blob, (document.getElementById('rejectedFilenameInput').value||'rejected')+'.xls');
+    }else{
+      downloadSectionAsPDF('rejectedTable','rejected','p',true);
+    }
+  }
+
+  function drawChart(){
+    const ctx=document.getElementById('damageChart').getContext('2d');
+    if(mainChart) mainChart.destroy();
+    const counts={};document.querySelectorAll('#logTable tbody tr').forEach(r=>{const p=r.children[4].innerText;counts[p]=(counts[p]||0)+1;});
+    mainChart=new Chart(ctx,{type:document.getElementById('chartType').value,data:{labels:Object.keys(counts),datasets:[{label:'عدد',data:Object.values(counts),backgroundColor:Object.keys(counts).map(()=>'#'+Math.floor(Math.random()*16777215).toString(16))}]},options:{plugins:{legend:{rtl:true}}}});
+  }
+  function updateSummaryTables(){
+  const today=new Date();
+  const counts={};
+  document.querySelectorAll('#logTable tbody tr').forEach(r=>{
+    const d=r.children[0].innerText;
+    if(!d) return;
+    const diff=(today - new Date(d))/(864e5);
+    if(diff<=1){
+      const mold=r.children[5].innerText || 'غير محدد';
+      counts[mold]=(counts[mold]||0)+1;
+    }
+  });
+  const tbody=document.querySelector('#dailyMoldTable tbody');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  for(const [m,c] of Object.entries(counts)){
+    tbody.innerHTML+=`<tr><td>${m}</td><td>${c}</td></tr>`;
+  }
+}
+  function updateProblemSummary(){
+    const counts={};document.querySelectorAll('#logTable tbody tr').forEach(r=>{const p=r.children[4].innerText;counts[p]=(counts[p]||0)+1;});
+    const tb=document.querySelector('#problemSummaryTable tbody');tb.innerHTML='';for(const [p,c] of Object.entries(counts)){tb.innerHTML+=`<tr><td>${p}</td><td>${c}</td></tr>`;}
+  }
+  function updateDailyProblemSummary(){
+    const dateKey=document.getElementById('loadDate').value||new Date().toISOString().split('T')[0];
+    const counts={};document.querySelectorAll('#logTable tbody tr').forEach(r=>{if(r.children[0].innerText===dateKey){const p=r.children[4].innerText;counts[p]=(counts[p]||0)+1;}});
+    const tb=document.querySelector('#dailyProblemTable tbody');tb.innerHTML='';for(const [p,c] of Object.entries(counts)){tb.innerHTML+=`<tr><td>${p}</td><td>${c}</td></tr>`;}
+  }
+  
+  /* Save / Load for rejected products */
+  function saveRejectedData(){
+    const k=document.getElementById('loadRejectedDate').value;
+    if(!k){alert('اختر تاريخ');return;}
+    localStorage.setItem('rejected-'+k,document.querySelector('#rejectedTable tbody').innerHTML);
+    alert('تم الحفظ');
+  }
+  
+  function loadRejectedData(){
+    const k=document.getElementById('loadRejectedDate').value;
+    if(!k){alert('اختر تاريخ');return;}
+    document.querySelector('#rejectedTable tbody').innerHTML=localStorage.getItem('rejected-'+k)||'';
+  }
+  
+  function clearRejectedTable(){
+    if(confirm('محو الكل؟')){
+      document.querySelector('#rejectedTable tbody').innerHTML='';
+    }
+  }
+
+  /* Save / Load */
+  function saveData(){const k=document.getElementById('loadDate').value;if(!k){alert('اختر تاريخ');return;}localStorage.setItem('log-'+k, JSON.stringify(Array.from(document.querySelectorAll('#logTable tbody tr')).map(r=>r.outerHTML)));alert('تم الحفظ');}
+  function loadData(){const k=document.getElementById('loadDate').value;if(!k){alert('اختر تاريخ');return;}
+    const data = localStorage.getItem('log-' + k);
+    if (data) {
+        try {
+            const rows = JSON.parse(data);
+            document.querySelector('#logTable tbody').innerHTML = rows.join('');
+        } catch(e) {
+            document.querySelector('#logTable tbody').innerHTML = data;
+        }
+    } else {
+        document.querySelector('#logTable tbody').innerHTML = '';
+    }
+    drawChart();updateSummaryTables();updateProblemSummary();updateDailyProblemSummary();}
+  function clearTable(){if(confirm('محو الكل؟')){document.querySelector('#logTable tbody').innerHTML='';updateSummaryTables();updateProblemSummary();updateDailyProblemSummary();}}
+
+  /* PDF helpers (from v8) */
+  function downloadSectionAsPDF(id,name,orientation='p',header=false){
+    const el=document.getElementById(id);
+    html2canvas(el,{scale:2,useCORS:true}).then(canvas=>{
+      const img=canvas.toDataURL('image/jpeg',1.0);
+      const {jsPDF}=window.jspdf;const pdf=new jsPDF(orientation,'mm','a4',true);
+      const pdfW=orientation==='l'?pdf.internal.pageSize.getHeight():pdf.internal.pageSize.getWidth();
+      const pdfH=pdf.internal.pageSize.getHeight();
+      if(header)addHeaderFooter(pdf);
+      pdf.addImage(img,'JPEG',25,30,pdfW-50,pdfH-50);
+      pdf.save(name+'.pdf');
+    });
+  }
+  function addHeaderFooter(pdf){
+    const w=pdf.internal.pageSize.getWidth(),h=pdf.internal.pageSize.getHeight();
+    pdf.setFontSize(12);pdf.text('Contrôle Qualité',w-10,15,{align:'right'});
+    pdf.text('Visa Superviseur Qualité',10,h-10);pdf.text('Visa Agent Qualité',w-10,h-10,{align:'right'});
+    pdf.setDrawColor(100);pdf.rect(20,25,w-40,h-50);
+  }
+  function exportSummaryCombinedPDF(){downloadSectionAsPDF('summarySection','ملخص_الأضرار','p',true);}
+</script>
+</body>
+</html>

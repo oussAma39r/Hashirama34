@@ -1,636 +1,86 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>نظام مراقبة جودة المجمدات — CFH & FH</title>
+<meta charset="UTF-8" />
+<title>Memoria – Perfume Finder V2</title>
 <style>
-  :root{
-    --bg:#eef6fb;
-    --card:#ffffff;
-    --accent1:#2f80ed;
-    --accent2:#56a0e0;
-    --muted:#6b7280;
-    --danger:#ef4444;
-    --soft-shadow: 0 8px 24px rgba(47,128,237,0.08);
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family: "Segoe UI", Tahoma, Arial, "Noto Naskh Arabic", sans-serif;
-    background: linear-gradient(180deg,var(--bg),#f7fbff 60%);
-    color:#0f172a;
-    direction: rtl;
-    padding-bottom:40px;
-  }
-  header{
-    background: linear-gradient(90deg,var(--accent1),var(--accent2));
+body {
+    font-family: Arial, sans-serif;
+    background:#fafaf7;
+    padding:20px;
+}
+.card {
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    max-width:430px;
+    margin:auto;
+    box-shadow:0 0 12px #0002;
+}
+button {
+    padding:12px 20px;
+    background:#556b2f;
     color:white;
-    padding:16px;
-    text-align:center;
-    font-size:20px;
-    box-shadow: 0 6px 18px rgba(47,128,237,0.15);
-  }
-  .container{width:95%;max-width:1200px;margin:18px auto;}
-  .menu{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:16px;}
-  .menu button{
-    background:var(--card);border:1px solid rgba(15,23,42,0.06);
-    padding:10px 14px;border-radius:12px;cursor:pointer;box-shadow:var(--soft-shadow);
-    min-width:140px;text-align:center;font-weight:700;
-  }
-  .menu button.active{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;box-shadow:0 10px 26px rgba(47,128,237,0.16)}
-  section.card{display:none;background:var(--card);border-radius:12px;padding:16px;box-shadow:var(--soft-shadow);margin-bottom:18px}
-  h2{margin:6px 0 12px 0;font-size:18px}
-  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-  label{font-size:13px;color:var(--muted)}
-  input[type="text"], input[type="number"], input[type="date"], input[type="time"], select, textarea {
-    padding:8px 10px;border-radius:8px;border:1px solid #e6eef8;min-width:120px;
-  }
-  button.primary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
-  button.danger{background:var(--danger);color:white;border:none;padding:6px 10px;border-radius:6px;cursor:pointer}
-  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
-  th, td{padding:8px;border:1px solid #eef6fb;text-align:center}
-  th{background:linear-gradient(90deg,#eaf4ff,#f9fdff);color:#0b3a66}
-  .small{font-size:13px;color:var(--muted)}
-  .note{background:#f0f7ff;padding:8px;border-radius:8px;color:#234;margin-top:8px}
-  @media(max-width:820px){ .row{flex-direction:column;align-items:stretch} .menu button{min-width:120px;font-size:14px} }
+    border:none;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+}
 </style>
 </head>
 <body>
-<header>📦 نظام مراقبة جودة المجمدات — CFH & FH</header>
 
-<div class="container">
-  <div class="menu" id="mainMenu">
-    <button data-target="search" class="active">🔎 بحث</button>
-    <button data-target="issues">⚠ تسجيل المشاكل</button>
-    <button data-target="foam">🧪 وزن الرغوة</button>
-    <button data-target="dp">🧩 المنتجات التالفة</button>
-    <button data-target="tanks">🛁 الأحواض التالفة</button>
-    <button data-target="moussage">🍶 Moussage</button>
-    <button data-target="structure">🔩 الهيكل التالف</button>
-    <button data-target="frames">🧭 الإطار البلاستيكي</button>
-  </div>
+<div class="card">
+<h2>Memoria – اختر عطرك المثالي</h2>
+<p>أجب عن الأسئلة التالية:</p>
 
-  <!-- ===== SEARCH ===== -->
-  <section id="search" class="card" style="display:block">
-    <h2>🔎 البحث عن المجمدات</h2>
-    <div class="row">
-      <label>أدخل EAN6 أو Code أو اكتب "FH" أو "CFH":</label>
-      <input type="text" id="searchInput" placeholder="مثال: 048813 أو CFH" />
-      <button class="primary" onclick="handleLookup()">عرض</button>
-      <button onclick="clearSearch()">مسح</button>
-    </div>
-    <div id="searchOutput" style="margin-top:12px"></div>
+<label>ما نوع الروائح التي تفضلها؟</label><br>
+<select id="q1">
+<option value="منعشة">منعشة</option>
+<option value="خشبية">خشبية</option>
+<option value="قوية">قوية</option>
+<option value="وردية">وردية</option>
+</select><br><br>
 
-    <hr style="margin:12px 0">
-    <div class="small note">
-      قائمة الموديلات المتاحة (CFH و FH فقط):
-      <select id="modelList" style="min-width:260px; margin-right:12px"></select>
-      <span id="modelEvap" class="small"></span>
-    </div>
-  </section>
+<label>متى تستعمل العطر غالبًا؟</label><br>
+<select id="q2">
+<option value="يومي">استعمال يومي</option>
+<option value="عمل">العمل</option>
+<option value="سهرات">السهرات</option>
+<option value="مناسبات">مناسبات خاصة</option>
+</select><br><br>
 
-  <!-- ===== ISSUES ===== -->
-  <section id="issues" class="card">
-    <h2>⚠ تسجيل المشاكل</h2>
-    <div class="row">
-      <div><label>موديل</label><br><select id="issueModel"></select></div>
-      <div><label>التاريخ</label><br><input type="date" id="issueDate" /></div>
-      <div><label>الوقت</label><br><input type="time" id="issueTime" /></div>
-      <div style="flex:1"><label>ملاحظة</label><br><input type="text" id="issueNote" placeholder="ملاحظة"/></div>
-      <div style="align-self:flex-end"><button class="primary" onclick="addIssue()">إضافة</button></div>
-    </div>
-    <table id="issuesTable"><thead><tr><th>موديل</th><th>تاريخ</th><th>وقت</th><th>ملاحظة</th><th>حذف</th></tr></thead><tbody></tbody></table>
-  </section>
+<button onclick="recommend()">اعرض العطر المناسب</button>
 
-  <!-- ===== FOAM ===== -->
-  <section id="foam" class="card">
-    <h2>🧪 وزن الرغوة (حساب تلقائي)</h2>
-    <div class="note">تعليمات: لكل قطعة الناتج = (وزن القطعة بالغم ÷ قراءة الضغط بالماء بالغم) × 1000. جسم = 5 قطع، باب = 3 قطع. الحفظ كقيمة رقمية (نسبة×1000) ثم يمكن عرضها أو تصديرها.</div>
-    <div class="row">
-      <div><label>موديل</label><br><select id="foamModel"></select></div>
-      <div><label>التاريخ</label><br><input type="date" id="foamDate" /></div>
-      <div><label>الوقت</label><br><input type="time" id="foamTime" /></div>
-      <div style="align-self:flex-end"><button class="primary" onclick="initFoam()">إنشاء سجل</button></div>
-    </div>
-
-    <div id="foamArea" style="display:none;margin-top:12px">
-      <h4>جسم — 5 قطع</h4>
-      <div id="bodyArea" class="row" style="flex-wrap:wrap;gap:10px"></div>
-      <h4 style="margin-top:12px">باب — 3 قطع</h4>
-      <div id="doorArea" class="row" style="flex-wrap:wrap;gap:10px"></div>
-      <div class="row" style="margin-top:12px">
-        <div><label>متوسط الجسم</label><br><input id="bodyAvg" readonly /></div>
-        <div><label>متوسط الباب</label><br><input id="doorAvg" readonly /></div>
-        <div style="align-self:flex-end"><button class="primary" onclick="saveFoamRecord()">حفظ</button></div>
-      </div>
-    </div>
-
-    <table id="foamTable"><thead><tr><th>موديل</th><th>تاريخ</th><th>وقت</th><th>متوسط الجسم</th><th>متوسط الباب</th><th>حذف</th></tr></thead><tbody></tbody></table>
-  </section>
-
-  <!-- ===== DAMAGED PRODUCTS ===== -->
-  <section id="dp" class="card">
-    <h2>🧩 المنتجات التالفة للمجمدة</h2>
-    <div class="row">
-      <div><label>موديل</label><br><select id="dpModel"></select></div>
-      <div><label>التاريخ</label><br><input type="date" id="dpDate" /></div>
-      <div><label>العدد</label><br><input type="number" id="dpCount" min="1" value="1" /></div>
-      <div style="flex:1"><label>نوع التلف / سبب</label><br><input type="text" id="dpType" placeholder="مثال: كسر، خدش"/></div>
-      <div style="align-self:flex-end"><button class="primary" onclick="addDP()">إضافة</button></div>
-    </div>
-    <table id="dpTable"><thead><tr><th>موديل</th><th>تاريخ</th><th>عدد</th><th>نوع</th><th>حذف</th></tr></thead><tbody></tbody></table>
-  </section>
-
-  <!-- ===== TANKS (ÉVAPORATEUR) ===== -->
-  <section id="tanks" class="card">
-    <h2>🛁 الأحواض التالفة — Évaporateur</h2>
-    <div class="note small">قائمة الحوض مقصورة على الأنواع التالية. حساب Evaporateur يتم فقط إذا اخترت "بعد الاستخدام الآلي".</div>
-    <div class="row" style="margin-top:10px">
-      <div>
-        <label>نوع الحوض</label><br>
-        <select id="tankType">
-          <option value="T13">T13 — 0.77 كغ</option>
-          <option value="T19">T19 — 0.90 كغ</option>
-          <option value="T280">T280 — 0.90 كغ</option>
-          <option value="T260">T260 — 0.90 كغ</option>
-          <option value="T380">T380 — 1.30 كغ</option>
-          <option value="T390">T390 — 1.25 كغ</option>
-          <option value="T450">T450 — 1.80 كغ</option>
-        </select>
-      </div>
-      <div><label>التاريخ</label><br><input type="date" id="tankDate" /></div>
-      <div><label>الكمية</label><br><input type="number" id="tankCount" min="1" value="1" /></div>
-      <div>
-        <label>نوع الحالة</label><br>
-        <select id="tankUsage">
-          <option value="matiere">مادة أولية</option>
-          <option value="manuel">بعد الاستخدام اليدوي</option>
-          <option value="auto">بعد الاستخدام الآلي</option>
-        </select>
-      </div>
-      <div><label>capillaire</label><br><input type="number" id="capillaire" min="0" value="0" /></div>
-      <div><label>plomb</label><br><input type="number" id="plomb" min="0" value="0" /></div>
-      <div><label>black board</label><br><input type="number" id="blackboard" min="0" value="0" /></div>
-    </div>
-
-    <div class="row" style="margin-top:8px">
-      <div><label>Side panel grand</label><br><input type="number" id="sideGrand" min="0" value="0" /></div>
-      <div><label>Side panel petit</label><br><input type="number" id="sidePetit" min="0" value="0" /></div>
-      <div><label>Bottom board</label><br><input type="number" id="bottomBoard" min="0" value="0" /></div>
-      <div style="align-self:flex-end"><button class="primary" onclick="addTankRecord()">أضف</button></div>
-    </div>
-
-    <table id="tanksTable">
-      <thead><tr>
-        <th>النوع</th><th>تاريخ</th><th>كمية</th><th>نوع الحالة</th><th>capillaire</th><th>plomb</th><th>black board</th>
-        <th>side grand</th><th>side petit</th><th>bottom</th><th>Evaporateur (كغ)</th><th>حذف</th>
-      </tr></thead><tbody></tbody>
-    </table>
-
-    <div style="margin-top:12px" class="row"><div class="small">إجمالي Evaporateur المحسوب: <strong id="evapTotal">0.00 كغ</strong></div></div>
-  </section>
-
-  <!-- ===== MOUSSAGE ===== -->
-  <section id="moussage" class="card">
-    <h2>🍶 Moussage (المنتجات التالفة)</h2>
-    <div class="row">
-      <div><label>موديل</label><br><select id="mModel"></select></div>
-      <div><label>نوع التلف</label><br><select id="mType"><option>Corps mousse</option><option>Porte mousse</option><option>Panneau</option><option>Contre porte</option></select></div>
-      <div><label>السبب</label><br><select id="mReason"><option value="pre_assemblage">pre assemblage</option><option value="defaut_mould">Defaut mould</option><option value="test_mould">Test mould</option><option value="test_densite">Test densite</option><option value="defaut_fournisseur">defout fournisseur</option><option value="other">Other</option></select></div>
-      <div><label>التاريخ</label><br><input type="date" id="mDate" /></div>
-      <div><label>العدد</label><br><input type="number" id="mCount" min="1" value="1" /></div>
-      <div style="align-self:flex-end"><button class="primary" onclick="addMoussage()">إضافة</button></div>
-    </div>
-    <table id="mTable"><thead><tr><th>موديل</th><th>النوع</th><th>السبب</th><th>تاريخ</th><th>عدد</th><th>حذف</th></tr></thead><tbody></tbody></table>
-  </section>
-
-  <!-- ===== STRUCTURE ===== -->
-  <section id="structure" class="card">
-    <h2>🔩 الهيكل التالف (صفائح)</h2>
-    <div class="row">
-      <div><label>جهة التلف</label><br><select id="sSide"><option>أمامي</option><option>خلفي</option><option>يمين</option><option>يسار</option></select></div>
-      <div><label>موديل</label><br><select id="sModel"></select></div>
-      <div><label>السبب</label><br><select id="sReason"><option value="matiere">مادة أولية</option><option value="cut_problem">مشكل في التقطيع</option><option value="transport">مشكل في النقل</option><option value="measurement">مشكل في القياسات</option><option value="other">أسباب أخرى</option></select></div>
-      <div><label>العدد</label><br><input type="number" id="sCount" min="1" value="1" /></div>
-      <div style="align-self:flex-end"><button class="primary" onclick="addStructure()">إضافة</button></div>
-    </div>
-    <table id="sTable"><thead><tr><th>جهة</th><th>موديل</th><th>السبب</th><th>عدد</th><th>تاريخ</th><th>حذف</th></tr></thead><tbody></tbody></table>
-  </section>
-
-  <!-- ===== FRAMES ===== -->
-  <section id="frames" class="card">
-    <h2>🧭 الإطار البلاستيكي — القياسات</h2>
-    <div class="note small">
-      قياسات محفوظة (خارجي — داخلي):
-      <ul style="margin:6px 0 0 0; padding-left:18px; text-align:right">
-        <li>T13: 565 مم — داخلي 465 مم</li>
-        <li>T19: 729 مم — داخلي 605 مم</li>
-        <li>T39: 1115 مم — داخلي 960 مم</li>
-        <li>T450: 1425 مم — داخلي 1270 مم</li>
-      </ul>
-    </div>
-
-    <div class="row" style="margin-top:10px">
-      <div><label>النوع</label><br>
-        <select id="frameType">
-          <option value="T13">T13</option>
-          <option value="T19">T19</option>
-          <option value="T39">T39</option>
-          <option value="T450">T450</option>
-        </select>
-      </div>
-      <div><label>الطول الخارجي (مم)</label><br><input type="number" id="frameOuter" /></div>
-      <div><label>الطول الداخلي (مم)</label><br><input type="number" id="frameInner" /></div>
-      <div style="align-self:flex-end"><button class="primary" onclick="saveFrame()">حفظ</button></div>
-    </div>
-
-    <table id="frameTable"><thead><tr><th>النوع</th><th>خارجي (مم)</th><th>داخلي (مم)</th><th>حذف</th></tr></thead><tbody></tbody></table>
-  </section>
+<hr>
+<div id="result"></div>
 
 </div>
 
 <script>
-/* ========== البيانات الأساسية: موديلات CFH & FH فقط ========== */
-const MODELS = [
-  { ean:'043153', code:'CFH140A' },
-  { ean:'039965', code:'CFH-MT26' },
-  { ean:'048752', code:'CFH-MT260V4G' },
-  { ean:'048813', code:'CFH-MT260V4W' },
-  { ean:'044181', code:'CFH-MT26G' },
-  { ean:'048516', code:'CFH-T130V2G' },
-  { ean:'048271', code:'CFH-T130V2W' },
-  { ean:'012357', code:'CFH-T13GM03' },
-  { ean:'012364', code:'CFH-T19GM04' },
-  { ean:'048561', code:'CFH-T390V1G' },
-  { ean:'048592', code:'CFH-T390V1W' },
-  { ean:'048509', code:'CFH-T390V2G' },
-  { ean:'048288', code:'CFH-T390V2W' },
-  { ean:'012371', code:'CFH-T39GM05' },
-  { ean:'043115', code:'CFH-T39GM05G' },
-  { ean:'048493', code:'CFH-T450V2G' },
-  { ean:'048523', code:'CFH-T450V2W' },
-  { ean:'025623', code:'CFH-T45GM10' },
-  { ean:'049438', code:'FH-CR280V1G' },
-  { ean:'049421', code:'FH-CR280V1W' },
-  { ean:'049452', code:'FH-CR280V3G' },
-  { ean:'049445', code:'FH-CR280V3W' },
-  { ean:'044198', code:'FH-CR380G' },
-  { ean:'049711', code:'FH-CR380V2G' },
-  { ean:'048738', code:'FH-CR380V2W' },
-  { ean:'039835', code:'FH-CR380W' }
+const products = [
+ { "key":"aventus", "name":"Creed Aventus", "price_50ml":"", "price_100ml":"", "description":"عطر خشبي فاكهي فاخر، مثالي للمناسبات والسهرات." },
+ { "key":"bleu", "name":"Bleu de Chanel", "price_50ml":"", "price_100ml":"", "description":"عطر أنيق ومنعش للنهار والعمل." },
+ { "key":"sauvage", "name":"Dior Sauvage", "price_50ml":"", "price_100ml":"", "description":"عطر قوي ومنعش، مثالي للسهرات والشباب." }
 ];
 
-/* ========== أوزان Évaporateur (كغ) كما طلبت ======== */
-const EVAP_KG = {
-  'T13': 0.77,
-  'T19': 0.90,
-  'T280': 0.90,
-  'T260': 0.90,
-  'T380': 1.30,
-  'T390': 1.25,
-  'T39': 1.25,
-  'T450': 1.80
-};
+function recommend(){
+    let t1 = document.getElementById("q1").value;
+    let t2 = document.getElementById("q2").value;
+    let chosen = null;
 
-/* ========== قياسات الإطارات الافتراضية (مم) ==========
-   تم حفظ القيم التي أرسلتها: (خارجي ، داخلي)
-*/
-const DEFAULT_FRAME_MEASUREMENTS = {
-  'T13': { outer: 565, inner: 465 },
-  'T19': { outer: 729, inner: 605 },
-  'T39': { outer: 1115, inner: 960 },
-  'T450': { outer: 1425, inner: 1270 }
-};
+    if(t1=="خشبية") chosen = products.find(p=>p.key=="aventus");
+    else if(t2=="يومي") chosen = products.find(p=>p.key=="bleu");
+    else chosen = products.find(p=>p.key=="sauvage");
 
-/* ========== مفاتيح localStorage لكل جدول ========== */
-const LS = {
-  issues: 'qa_issues_cf_fh_v1',
-  foam: 'qa_foam_cf_fh_v1',
-  dp: 'qa_dp_cf_fh_v1',
-  tanks: 'qa_tanks_cf_fh_v1',
-  moussage: 'qa_moussage_cf_fh_v1',
-  struct: 'qa_struct_cf_fh_v1',
-  frames: 'qa_frames_cf_fh_v1'
-};
-
-/* ---------- دوال مساعدة ---------- */
-function formatKg(v){ if(v===null||v===undefined||isNaN(v)) return ''; return Number(v).toFixed(2) + ' كغ'; }
-
-function findModelByEAN(ean){ return MODELS.find(x => x.ean === ean) || null; }
-function findModelByCode(code){ return MODELS.find(x => x.code === code) || null; }
-
-/* computeEvapFromString: يحاول التعرف على Txxx داخل سلسلة الموديل أو أرقام مثل 280 في FH-CR280V1G */
-function computeEvapFromString(s){
-  if(!s) return null;
-  const up = String(s).toUpperCase();
-  const keys = Object.keys(EVAP_KG).sort((a,b)=>b.length - a.length);
-  for(const k of keys){
-    if(up.includes(k.toUpperCase())) return EVAP_KG[k];
-    const num = k.replace(/^T/i,'');
-    const re = new RegExp('(^|[^0-9])' + num + '([^0-9]|$)','i');
-    if(re.test(up)) return EVAP_KG[k];
-  }
-  return null;
+    document.getElementById("result").innerHTML = `
+        <h3>العطر المقترح: ${chosen.name}</h3>
+        <p>${chosen.description}</p>
+        <p><b>السعر 50ml:</b> ${chosen.price_50ml || "—"}</p>
+        <p><b>السعر 100ml:</b> ${chosen.price_100ml || "—"}</p>
+    `;
 }
-
-/* ---------- تعبئة قوائم الموديلات ---------- */
-function fillModelSelects(){
-  const list = document.getElementById('modelList');
-  list.innerHTML = '<option value="">-- اختر موديل --</option>';
-  MODELS.forEach(m=>{
-    const opt = document.createElement('option');
-    opt.value = m.code + '||' + m.ean;
-    opt.textContent = `${m.code} — ${m.ean}`;
-    list.appendChild(opt);
-  });
-  const ids = ['issueModel','foamModel','dpModel','mModel','sModel'];
-  ids.forEach(id=>{
-    const sel = document.getElementById(id);
-    if(!sel) return;
-    sel.innerHTML = '';
-    MODELS.forEach(m=>{
-      const opt = document.createElement('option');
-      opt.value = m.code;
-      opt.textContent = m.code;
-      sel.appendChild(opt);
-    });
-  });
-}
-fillModelSelects();
-
-/* ---------- إدارة التنقل بين الأقسام ---------- */
-document.querySelectorAll('#mainMenu button').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('#mainMenu button').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    const t = btn.dataset.target;
-    document.querySelectorAll('section.card').forEach(s=>s.style.display='none');
-    document.getElementById(t).style.display = 'block';
-  });
-});
-
-/* ===================== البحث ===================== */
-function handleLookup(){
-  const q = document.getElementById('searchInput').value.trim();
-  const out = document.getElementById('searchOutput');
-  out.innerHTML = '';
-  if(!q){ out.innerHTML = '<div class="small">اكتب EAN6 أو Code أو FH/CFH</div>'; return; }
-  const up = q.toUpperCase();
-  if(up === 'FH' || up === 'CFH'){
-    if(up === 'FH'){
-      out.innerHTML = `<pre>FH-CR280/380 V1:
- Thermostat mécanique
- Compresseur Vitesse constante
-
-FH-CR280/380 V2:
- Thermostat mécanique
- Compresseur inverter
-
-FH-CR280/380 V3:
- Thermostat électronique
- Compresseur Vitesse constante</pre>`;
-    } else {
-      out.innerHTML = `<pre>CFH-390/450/130/260 V1:
- Thermostat mécanique
- Compresseur Vitesse constante
-
-CFH-390/450/130/260 V2:
- Thermostat électronique
- Compresseur Vitesse constante
-
-CFH-390/450/130/260 V3:
- Thermostat électronique
- Compresseur inverter
-
-CFH-390/450/130/260 V4:
- Thermostat mécanique
- Compresseur inverter</pre>`;
-    }
-    return;
-  }
-  let found = findModelByEAN(q);
-  if(!found) found = findModelByCode(q);
-  if(found){
-    const evap = computeEvapFromString(found.code);
-    out.innerHTML = `<div><strong>الموديل:</strong> ${found.code} — <small class="small">EAN ${found.ean}</small></div>
-                     <div style="margin-top:8px"><strong>Evaporateur:</strong> ${evap !== null ? formatKg(evap) : '<span class="small muted">غير معروف</span>'}</div>`;
-    const sel = document.getElementById('modelList');
-    for(let i=0;i<sel.options.length;i++){
-      if(sel.options[i].value.startsWith(found.code + '||')){ sel.selectedIndex = i; break; }
-    }
-    document.getElementById('modelEvap').textContent = evap !== null ? `Evap: ${formatKg(evap)}` : '';
-  } else {
-    out.innerHTML = '<div class="small muted">لم يتم العثور على هذا الكود ضمن CFH أو FH.</div>';
-  }
-}
-function clearSearch(){ document.getElementById('searchInput').value=''; document.getElementById('searchOutput').innerHTML=''; document.getElementById('modelList').selectedIndex = 0; document.getElementById('modelEvap').textContent=''; }
-
-/* عرض Evap عند اختيار موديل من القائمة */
-document.getElementById('modelList').addEventListener('change', function(){
-  const v = this.value;
-  if(!v){ document.getElementById('modelEvap').textContent=''; return; }
-  const code = v.split('||')[0];
-  const evap = computeEvapFromString(code);
-  document.getElementById('modelEvap').textContent = evap !== null ? `Evap: ${formatKg(evap)}` : 'Evap: غير معروف';
-});
-
-/* ========== Generic delete from localStorage helper ========== */
-function deleteFromLS(key, idx, reloadFn){
-  const arr = JSON.parse(localStorage.getItem(key) || '[]');
-  if(idx < 0 || idx >= arr.length) return;
-  if(!confirm('هل أنت متأكد من الحذف؟')) return;
-  arr.splice(idx,1);
-  localStorage.setItem(key, JSON.stringify(arr));
-  if(typeof reloadFn === 'function') reloadFn();
-}
-
-/* ========================== ISSUES ========================== */
-function loadIssues(){
-  const arr = JSON.parse(localStorage.getItem(LS.issues) || '[]');
-  const tb = document.querySelector('#issuesTable tbody'); tb.innerHTML='';
-  arr.forEach((it,idx)=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${it.model}</td><td>${it.date}</td><td>${it.time}</td><td>${it.note||''}</td>
-      <td><button class="danger" onclick="deleteFromLS('${LS.issues}', ${idx}, loadIssues)">حذف</button></td>`;
-    tb.appendChild(tr);
-  });
-}
-function addIssue(){
-  const model = document.getElementById('issueModel').value;
-  const date = document.getElementById('issueDate').value;
-  const time = document.getElementById('issueTime').value;
-  const note = document.getElementById('issueNote').value;
-  if(!model || !date || !time){ alert('املأ الموديل والتاريخ والوقت'); return; }
-  const arr = JSON.parse(localStorage.getItem(LS.issues) || '[]');
-  arr.push({model,date,time,note});
-  localStorage.setItem(LS.issues, JSON.stringify(arr));
-  document.getElementById('issueNote').value='';
-  loadIssues();
-}
-loadIssues();
-
-/* ========================== FOAM ========================== */
-function initFoam(){
-  const model = document.getElementById('foamModel').value;
-  const date = document.getElementById('foamDate').value;
-  const time = document.getElementById('foamTime').value;
-  if(!model || !date || !time){ alert('املأ الحقول الأساسية'); return; }
-  document.getElementById('foamArea').style.display = 'block';
-  const bodyArea = document.getElementById('bodyArea'); bodyArea.innerHTML='';
-  const doorArea = document.getElementById('doorArea'); doorArea.innerHTML='';
-  for(let i=1;i<=5;i++){
-    const div = document.createElement('div'); div.style.minWidth='150px';
-    div.innerHTML = `<div class="small">قطعة ${i} - وزن (غ)</div><input type="number" id="bp${i}" step="0.01"/><div class="small">قراءة الماء (غ)</div><input type="number" id="bw${i}" step="0.01"/>`;
-    bodyArea.appendChild(div);
-  }
-  for(let i=1;i<=3;i++){
-    const div = document.createElement('div'); div.style.minWidth='150px';
-    div.innerHTML = `<div class="small">باب ${i} - وزن (غ)</div><input type="number" id="dp${i}" step="0.01"/><div class="small">قراءة الماء (غ)</div><input type="number" id="dw${i}" step="0.01"/>`;
-    doorArea.appendChild(div);
-  }
-  for(let i=1;i<=5;i++){ document.getElementById('bp'+i).addEventListener('input', computeFoam); document.getElementById('bw'+i).addEventListener('input', computeFoam); }
-  for(let i=1;i<=3;i++){ document.getElementById('dp'+i).addEventListener('input', computeFoam); document.getElementById('dw'+i).addEventListener('input', computeFoam); }
-  const area = document.getElementById('foamArea');
-  area.dataset.model = model; area.dataset.date = date; area.dataset.time = time;
-  computeFoam();
-}
-function computeFoam(){
-  const bodyVals=[]; for(let i=1;i<=5;i++){ const pw=+ (document.getElementById('bp'+i).value||0); const wt=+ (document.getElementById('bw'+i).value||0); if(pw>0 && wt>0) bodyVals.push((pw/wt)*1000); }
-  const doorVals=[]; for(let i=1;i<=3;i++){ const pw=+ (document.getElementById('dp'+i).value||0); const wt=+ (document.getElementById('dw'+i).value||0); if(pw>0 && wt>0) doorVals.push((pw/wt)*1000); }
-  const bavg = bodyVals.length ? (bodyVals.reduce((a,b)=>a+b,0)/bodyVals.length) : 0;
-  const davg = doorVals.length ? (doorVals.reduce((a,b)=>a+b,0)/doorVals.length) : 0;
-  document.getElementById('bodyAvg').value = bavg ? bavg.toFixed(2) : '';
-  document.getElementById('doorAvg').value = davg ? davg.toFixed(2) : '';
-}
-function saveFoamRecord(){
-  const area = document.getElementById('foamArea');
-  const model = area.dataset.model;
-  const date = area.dataset.date;
-  const time = area.dataset.time;
-  const body = document.getElementById('bodyAvg').value || '';
-  const door = document.getElementById('doorAvg').value || '';
-  const arr = JSON.parse(localStorage.getItem(LS.foam) || '[]');
-  arr.push({model,date,time,body,door});
-  localStorage.setItem(LS.foam, JSON.stringify(arr));
-  document.getElementById('foamArea').style.display='none';
-  loadFoamTable();
-}
-function loadFoamTable(){ const arr = JSON.parse(localStorage.getItem(LS.foam) || '[]'); const tb=document.querySelector('#foamTable tbody'); tb.innerHTML=''; arr.forEach((it,idx)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${it.model}</td><td>${it.date}</td><td>${it.time}</td><td>${it.body}</td><td>${it.door}</td><td><button class="danger" onclick="deleteFromLS('${LS.foam}', ${idx}, loadFoamTable)">حذف</button></td>`; tb.appendChild(tr); }); }
-loadFoamTable();
-
-/* ========================== DAMAGED PRODUCTS ========================== */
-function addDP(){ const model=document.getElementById('dpModel').value; const date=document.getElementById('dpDate').value; const count=+document.getElementById('dpCount').value||0; const type=document.getElementById('dpType').value; if(!model||!date||!count){ alert('املأ الحقول'); return;} const arr=JSON.parse(localStorage.getItem(LS.dp)||'[]'); arr.push({model,date,count,type}); localStorage.setItem(LS.dp, JSON.stringify(arr)); loadDP(); }
-function loadDP(){ const arr=JSON.parse(localStorage.getItem(LS.dp)||'[]'); const tb=document.querySelector('#dpTable tbody'); tb.innerHTML=''; arr.forEach((it,idx)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${it.model}</td><td>${it.date}</td><td>${it.count}</td><td>${it.type||''}</td><td><button class="danger" onclick="deleteFromLS('${LS.dp}', ${idx}, loadDP)">حذف</button></td>`; tb.appendChild(tr); }); }
-loadDP();
-
-/* ========================== TANKS ========================== */
-function addTankRecord(){
-  const type = document.getElementById('tankType').value;
-  const date = document.getElementById('tankDate').value;
-  const count = +document.getElementById('tankCount').value||0;
-  const usage = document.getElementById('tankUsage').value;
-  const capillaire = +document.getElementById('capillaire').value||0;
-  const plomb = +document.getElementById('plomb').value||0;
-  const blackboard = +document.getElementById('blackboard').value||0;
-  const sideGrand = +document.getElementById('sideGrand').value||0;
-  const sidePetit = +document.getElementById('sidePetit').value||0;
-  const bottom = +document.getElementById('bottomBoard').value||0;
-  if(!type||!date||!count){ alert('املأ الحقول'); return; }
-  let evap = null;
-  if(usage === 'auto'){
-    const w = computeEvapFromString(type);
-    if(w !== null) evap = +(w * count);
-  }
-  const arr = JSON.parse(localStorage.getItem(LS.tanks) || '[]');
-  arr.push({type,date,count,usage,capillaire,plomb,blackboard,sideGrand,sidePetit,bottom,evap});
-  localStorage.setItem(LS.tanks, JSON.stringify(arr));
-  document.getElementById('tankCount').value='1'; document.getElementById('capillaire').value='0'; document.getElementById('plomb').value='0'; document.getElementById('blackboard').value='0';
-  document.getElementById('sideGrand').value='0'; document.getElementById('sidePetit').value='0'; document.getElementById('bottomBoard').value='0';
-  loadTanks();
-}
-function loadTanks(){
-  const arr = JSON.parse(localStorage.getItem(LS.tanks) || '[]');
-  const tb = document.querySelector('#tanksTable tbody'); tb.innerHTML='';
-  let total = 0;
-  arr.forEach((it,idx)=>{
-    const evapText = (it.evap !== null && it.evap !== undefined) ? formatKg(it.evap) : '';
-    if(it.evap) total += it.evap;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${it.type}</td><td>${it.date}</td><td>${it.count}</td><td>${it.usage}</td>
-      <td>${it.capillaire}</td><td>${it.plomb}</td><td>${it.blackboard}</td>
-      <td>${it.sideGrand}</td><td>${it.sidePetit}</td><td>${it.bottom}</td>
-      <td>${evapText}</td>
-      <td><button class="danger" onclick="deleteFromLS('${LS.tanks}', ${idx}, loadTanks)">حذف</button></td>`;
-    tb.appendChild(tr);
-  });
-  document.getElementById('evapTotal').textContent = total.toFixed(2) + ' كغ';
-}
-loadTanks();
-
-/* ========================== MOUSSAGE ========================== */
-function addMoussage(){ const model=document.getElementById('mModel').value; const type=document.getElementById('mType').value; const reason=document.getElementById('mReason').value; const date=document.getElementById('mDate').value; const count=+document.getElementById('mCount').value||0; if(!model||!date||!count){ alert('املأ الحقول'); return;} const arr=JSON.parse(localStorage.getItem(LS.moussage)||'[]'); arr.push({model,type,reason,date,count}); localStorage.setItem(LS.moussage, JSON.stringify(arr)); loadMoussage(); }
-function loadMoussage(){ const arr=JSON.parse(localStorage.getItem(LS.moussage)||'[]'); const tb=document.querySelector('#mTable tbody'); tb.innerHTML=''; arr.forEach((it,idx)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${it.model}</td><td>${it.type}</td><td>${it.reason}</td><td>${it.date}</td><td>${it.count}</td><td><button class="danger" onclick="deleteFromLS('${LS.moussage}', ${idx}, loadMoussage)">حذف</button></td>`; tb.appendChild(tr); }); }
-loadMoussage();
-
-/* ========================== STRUCTURE ========================== */
-function addStructure(){ const side=document.getElementById('sSide').value; const model=document.getElementById('sModel').value; const reason=document.getElementById('sReason').value; const count=+document.getElementById('sCount').value||0; const date=new Date().toISOString().slice(0,10); if(!model||!count){ alert('املأ الحقول'); return;} const arr=JSON.parse(localStorage.getItem(LS.struct)||'[]'); arr.push({side,model,reason,count,date}); localStorage.setItem(LS.struct, JSON.stringify(arr)); loadStructure(); }
-function loadStructure(){ const arr=JSON.parse(localStorage.getItem(LS.struct)||'[]'); const tb=document.querySelector('#sTable tbody'); tb.innerHTML=''; arr.forEach((it,idx)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${it.side}</td><td>${it.model}</td><td>${it.reason}</td><td>${it.count}</td><td>${it.date}</td><td><button class="danger" onclick="deleteFromLS('${LS.struct}', ${idx}, loadStructure)">حذف</button></td>`; tb.appendChild(tr); }); }
-loadStructure();
-
-/* ========================== FRAMES (الإطار البلاستيكي) ========================== */
-
-/* عند تغيير النوع، عيّن القياسات الافتراضية من DEFAULT_FRAME_MEASUREMENTS */
-const frameTypeEl = document.getElementById('frameType');
-const frameOuterEl = document.getElementById('frameOuter');
-const frameInnerEl = document.getElementById('frameInner');
-
-function applyDefaultFrameMeasurements(){
-  const type = frameTypeEl.value;
-  const def = DEFAULT_FRAME_MEASUREMENTS[type];
-  if(def){
-    frameOuterEl.value = def.outer;
-    frameInnerEl.value = def.inner;
-  } else {
-    frameOuterEl.value = '';
-    frameInnerEl.value = '';
-  }
-}
-frameTypeEl.addEventListener('change', applyDefaultFrameMeasurements);
-applyDefaultFrameMeasurements();
-
-/* حفظ قياس الإطار في localStorage وإظهار الجدول مع الوحدات (مم) */
-function saveFrame(){
-  const type = frameTypeEl.value;
-  const outer = (document.getElementById('frameOuter').value || '').toString().trim();
-  const inner = (document.getElementById('frameInner').value || '').toString().trim();
-  if(!outer || !inner){ alert('ادخل القياس الخارجي والداخلي بالملم'); return; }
-  const arr = JSON.parse(localStorage.getItem(LS.frames) || '[]');
-  arr.push({type,outer: Number(outer),inner: Number(inner)});
-  localStorage.setItem(LS.frames, JSON.stringify(arr));
-  loadFrames();
-}
-
-/* تحميل وعرض الجداول مع إظهار "مم" في الخلايا */
-function loadFrames(){
-  const arr = JSON.parse(localStorage.getItem(LS.frames) || '[]');
-  const tb = document.querySelector('#frameTable tbody'); tb.innerHTML='';
-  arr.forEach((it,idx)=>{
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${it.type}</td><td>${it.outer} مم</td><td>${it.inner} مم</td><td><button class="danger" onclick="deleteFromLS('${LS.frames}', ${idx}, loadFrames)">حذف</button></td>`;
-    tb.appendChild(tr);
-  });
-}
-loadFrames();
-
-/* ---------- تهيئة تواريخ افتراضية ---------- */
-document.querySelectorAll('input[type="date"]').forEach(i=>{ if(!i.value) i.value = new Date().toISOString().slice(0,10); });
-
-/* ========== INIT ========== */
-(function init(){
-  fillModelSelects();
-  loadIssues(); loadFoamTable(); loadDP(); loadTanks(); loadMoussage(); loadStructure(); loadFrames();
-})();
 </script>
+
 </body>
 </html>

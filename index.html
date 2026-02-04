@@ -3,350 +3,208 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🏭 نظام كوندور المتكامل - مراقبة الجودة والبحث</title>
+<title>🏭 نظام كوندور - V5.0</title>
 <style>
   :root{
-    --bg:#2f3640;
-    --section-bg:#353b48;
-    --table-bg:#2d3436;
-    --border:#636e72;
-    --text:#ecf0f1;
+    --bg:#1a1d21;
+    --card-bg:#2d3436;
     --accent:#00cec9;
-    --dark-card: #151617;
-    --dark-accent-text: #aeeeff;
-    --warning: #ffb3b3;
-    --success: #bfffcf;
-    --primary-btn: #4a4ad0;
-    --alt-btn: #009879;
-    --search-highlight: #00c8ff;
+    --text:#ecf0f1;
+    --border:#4b5563;
   }
-  *{box-sizing:border-box;font-family:'Arial',sans-serif;}
-  body{margin:0;background:var(--bg);color:var(--text);line-height:1.6;}
+  *{box-sizing:border-box; font-family:'Segoe UI', Tahoma, sans-serif; text-transform: uppercase;}
+  body{margin:0; background:var(--bg); color:var(--text); padding-bottom:50px;}
   
   /* Sidebar */
-  .sidebar{
-    height:100%;width:0;position:fixed;z-index:10;top:0;right:0;
-    background:#111;overflow-x:hidden;transition:0.3s;padding-top:60px;
-  }
-  .sidebar a{
-    display:block;padding:10px 30px;font-size:18px;color:#f1f1f1;text-decoration:none;
-  }
-  .sidebar a:hover{background:#575757;}
-  .sidebar .closebtn{position:absolute;top:0;right:25px;font-size:36px;}
-  .openbtn{
-    font-size:30px;cursor:pointer;color:#fff;position:fixed;top:15px;right:15px;z-index:4;
-  }
+  .sidebar{height:100%; width:0; position:fixed; z-index:100; top:0; right:0; background:#111; overflow-x:hidden; transition:0.3s; padding-top:60px;}
+  .sidebar a{display:block; padding:12px 25px; font-size:16px; color:#f1f1f1; text-decoration:none; border-bottom:1px solid #222;}
+  .sidebar a:hover{background:var(--accent); color:#000;}
+  .openbtn{font-size:22px; cursor:pointer; background:var(--accent); color:#000; padding:10px 15px; position:fixed; top:15px; right:15px; z-index:99; border-radius:5px; border:none;}
 
   /* Sections */
-  .sectionPage{display:none;padding:80px 20px;}
-  .section{background:var(--section-bg);padding:20px;border-radius:8px;margin-bottom:20px;}
-  .card{background:var(--dark-card);border-radius:10px;padding:14px;margin:14px 0;box-shadow:0 6px 18px rgba(0,0,0,0.6);}
-
-  /* Inputs & Buttons */
-  input,select,textarea,button{
-    padding:8px;margin:5px;border-radius:4px;border:1px solid var(--border);
-    background:var(--table-bg);color:var(--text);
-  }
-  input[type=number],input[type=text]{min-width:140px;text-align:center;}
-  button{cursor:pointer;background:var(--primary-btn);color:#fff;font-weight:bold;border:none;}
-  button:not(.closebtn):not(.openbtn){background:var(--accent);color:#000;font-weight:bold;}
-  button.alt{background:var(--alt-btn);color:#fff;}
-
-  /* Table */
-  table{width:100%;border-collapse:collapse;background:var(--table-bg);font-size:14px;}
-  th,td{border:1px solid #555;padding:8px;text-align:center;color:#fff;}
-  th{background:var(--border);color:var(--dark-accent-text);}
+  .sectionPage{display:none; padding:70px 15px 20px;}
+  .active-section{display:block;}
+  .card{background:var(--card-bg); padding:18px; border-radius:12px; margin-bottom:15px; box-shadow:0 4px 15px rgba(0,0,0,0.4);}
   
-  /* Search Results Styling */
-  .search-result-item {
-    background: #2b2b2b; padding: 10px; margin-top: 10px; border-radius: 5px; border-right: 4px solid var(--search-highlight);
-    text-align: right;
-  }
-  .error { color: #ff6b6b; margin-top: 10px; }
+  /* Tables */
+  .table-container{overflow-x:auto; margin-top:10px;}
+  table{width:100%; border-collapse:collapse; background:#222; font-size:14px;}
+  th, td{border:1px solid #444; padding:10px; text-align:center;}
+  th{background:var(--border); color:var(--accent);}
+  
+  /* Inputs */
+  input, select, button{padding:12px; margin:5px 0; border-radius:6px; border:1px solid #555; background:#111; color:#fff; width:100%; font-weight: bold;}
+  button{cursor:pointer; background:var(--accent); color:#000;}
 
-  .image-preview{max-width:150px;max-height:120px;object-fit:contain;display:block;margin:auto;border:1px solid #ccc;border-radius:4px;}
-  canvas{max-width:100%;margin-top:20px;}
+  /* Search & Badges */
+  .search-item{background:#3d4e5f; padding:15px; border-right:5px solid var(--accent); margin-bottom:10px; border-radius:4px;}
+  .gas-badge {background: #d63031; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.85em; margin-top: 5px; display: inline-block;}
+  .version-box {background: #000; padding: 10px; margin: 10px 0; border: 1px solid var(--accent); border-radius: 8px;}
 </style>
 </head>
 <body>
 
-<span class="openbtn" onclick="toggleSidebar()">☰</span>
+<button class="openbtn" onclick="toggleSidebar()">☰ القائمة</button>
 
 <div class="sidebar" id="mySidebar">
-  <a class="closebtn" href="javascript:void(0)" onclick="toggleSidebar()">×</a>
-  <a href="#" onclick="showSection('searchSection')">🔍 البحث عن موديل (EAN6)</a>
-  <hr style="border-color:#333;">
-  <a href="#" onclick="showSection('entrySection')">📝 ادخال مشكلة جديدة</a>
-  <a href="#" onclick="showSection('rejectedSection')">🗑️ قائمة المجمدة التالفة</a>
-  <a href="#" onclick="showSection('dateSection')">📋 التقارير حسب التاريخ</a>
-  <a href="#" onclick="showSection('summarySection');scrollToAnchor('dailyReportTitle')">📊 ملخص الأضرار</a>
-  <hr style="border-color:#333;">
-  <a href="#" onclick="showSection('mouldDataSection')">📐 بيانات القوالب</a>
-  <a href="#" onclick="showSection('componentDataSection')">🧪 تفاصيل المكونات</a>
-  <a href="#" onclick="showSection('densitySection')">🌊 حساب الكثافة</a>
+  <a href="javascript:void(0)" onclick="toggleSidebar()">× إغلاق</a>
+  <a href="#" onclick="showSection('searchSection')">🔍 البحث والمواصفات</a>
+  <a href="#" onclick="showSection('densitySection')">🌊 حساب الكثافة (CROMPTAGE)</a>
+  <a href="#" onclick="showSection('mouldDataSection')">📐 بيانات القوالب (MOULE)</a>
 </div>
 
-<div id="heroSection" style="background-image: url('https://cdn.pixabay.com/photo/2013/07/12/18/20/freezer-153810_960_720.png'); background-size: cover; background-position: center; height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; color: white; text-shadow: 1px 1px 5px black;">
-  <div style="max-width: 90%; text-align: center; background-color: rgba(0,0,0,0.6); padding: 30px; border-radius: 15px;">
-    <h1 style="font-size: 36px; margin-bottom: 10px;">نظام مراقبة الفريزرات المتكامل</h1>
-    <p>البحث عن الأكواد، تسجيل العيوب، وحساب كثافة الرغوة في منصة واحدة.</p>
-    <button onclick="openMainMenu()" style="margin-top: 20px; padding: 12px 25px; background: #00cec9; color: #000; font-size: 18px; border-radius: 6px;">ابدأ العمل</button>
-  </div>
-</div>
-
-<div id="mainMenu" style="display:none; min-height: 100vh; background: #2f3640; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; padding: 20px;">
-  <button onclick="navigateTo('searchSection')" style="width:250px; background:var(--search-highlight);">🔍 بحث EAN6 / موديل</button>
-  <button onclick="navigateTo('entrySection')" style="width:250px;">📝 مشكلة جديدة</button>
-  <button onclick="navigateTo('rejectedSection')" style="width:250px;">🗑️ المجمدة التالفة</button>
-  <button onclick="navigateTo('densitySection')" style="width:250px; background: var(--primary-btn); color:white;">🌊 حساب الكثافة</button>
-  <button onclick="navigateTo('summarySection')" style="width:250px;">📊 ملخص الأضرار</button>
-</div>
-
-<div class="sectionPage" id="searchSection">
-  <div class="section">
-    <h2 style="color:var(--search-highlight)">🔍 البحث عن بيانات الفريزر</h2>
-    <p>أدخل كود <b>EAN6</b> أو اسم <b>الموديل</b> (مثال: 048738 أو CRF)</p>
-    <input type="text" id="searchInput" placeholder="بحث..." style="width: 100%; height: 50px; font-size: 20px;">
-    <button onclick="performSearch()" style="width: 100%; padding: 15px; margin-top: 10px;">بحث الآن</button>
-    <div id="searchResults" style="margin-top: 20px;"></div>
-  </div>
-</div>
-
-<div class="sectionPage" id="entrySection">
-<div class="section">
-<h2>📝 إدخال مشكلة جديدة</h2>
-<label>اسم الفريزر:</label>
-<select id="freezerName">
-  <option value="RFDK510G">RFDK510G</option><option value="CFH140A">CFH140A</option><option value="CFH-MT26">CFH-MT26</option><option value="CFH-MT260V4G">CFH-MT260V4G</option><option value="CFH-MT260V4W">CFH-MT260V4W</option><option value="CFH-MT26G">CFH-MT26G</option><option value="CFH-T130V2G">CFH-T130V2G</option><option value="CFH-T130V2W">CFH-T130V2W</option><option value="CFH-T13GM03">CFH-T13GM03</option><option value="CFH-T19GM04">CFH-T19GM04</option><option value="CFH-T390V1G">CFH-T390V1G</option><option value="CFH-T390V1W">CFH-T390V1W</option><option value="CFH-T390V2G">CFH-T390V2G</option><option value="CFH-T390V2W">CFH-T390V2W</option><option value="CFH-T39GM05">CFH-T39GM05</option><option value="CFH-T39GM05G">CFH-T39GM05G</option><option value="CFH-T450V2G">CFH-T450V2G</option><option value="CFH-T450V2W">CFH-T450V2W</option><option value="CFH-T45GM10">CFH-T45GM10</option><option value="CRD45V4G">CRD45V4G</option><option value="CRD45V4N">CRD45V4N</option><option value="CRD45V4W">CRD45V4W</option><option value="CRD45V4X">CRD45V4X</option><option value="CRD58V4G">CRD58V4G</option><option value="CRD58V4W">CRD58V4W</option><option value="CRD58V4X">CRD58V4X</option><option value="CRD65V4G">CRD65V4G</option><option value="CRD65V4W">CRD65V4W</option><option value="CRD65V4X">CRD65V4X</option><option value="CRF-T12GM7">CRF-T12GM7</option><option value="CRF-T12GM7N">CRF-T12GM7N</option><option value="CRF-T36GH07">CRF-T36GH07</option><option value="CRF-T36GH07-G">CRF-T36GH07-G</option><option value="FH-CR280V1G">FH-CR280V1G</option><option value="FH-CR280V1W">FH-CR280V1W</option><option value="FH-CR280V3G">FH-CR280V3G</option><option value="FH-CR280V3W">FH-CR280V3W</option><option value="FH-CR380G">FH-CR380G</option><option value="FH-CR380V2G">FH-CR380V2G</option><option value="FH-CR380V2W">FH-CR380V2W</option><option value="FH-CR380W">FH-CR380W</option><option value="KFV240W">KFV240W</option>
-</select>
-<br/>
-<label>المشكلة:</label>
-<select id="problem">
-  <option value="خدوش أو انبعاجات أثناء النقل">خدوش أو انبعاجات أثناء النقل</option>
-  <option value="إمالة الهيكل أثناء النقل">إمالة الهيكل أثناء النقل</option>
-  <option value="توزيع غير متساو للرغوة">توزيع غير متساو للرغوة</option>
-  <option value="فراغات أو تجاويف في الرغوة">فراغات أو تجاويف في الرغوة</option>
-  <option value="تشوهات في الهيكل">تشوهات في الهيكل</option>
-  <option value="رغوة زائدة أو تسرب">رغوة زائدة أو تسرب</option>
-  <option value="رائحة كيميائية قوية">رائحة كيميائية قوية</option>
-  <option value="تكثف داخلي أو تأكل">تكثف داخلي أو تأكل</option>
-  <option value="مشاكل القالب الداخلي">مشاكل القالب الداخلي</option>
-  <option value="مشاكل القالب الخارجي">مشاكل القالب الخارجي</option>
-  <option value="مشاكل الإطار البلاستيكي">مشاكل الإطار البلاستيكي</option>
-  <option value="مشاكل اخرى">مشاكل اخرى</option>
-</select>
-<label>رقم القالب:</label>
-<select id="moldNumber"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>لا يتعلق بالقالب</option></select>
-<br/>
-<label>وصف المشكلة:</label>
-<textarea id="description" rows="2" style="width:100%"></textarea>
-<br/>
-<label>صورة:</label>
-<input accept="image/*" capture="environment" id="imageInput" onchange="previewImage()" type="file"/>
-<div id="imagePreviewContainer" style="display:none;"></div>
-<br/>
-<label>التاريخ:</label><input id="date" type="date"/>
-<label>الوقت:</label><input id="time" type="time"/>
-<label>الفترة:</label>
-<select id="period"><option value="صباحية">صباحية</option><option value="مسائية">مسائية</option></select>
-<br/>
-<button onclick="addRow()" style="background:var(--alt-btn); color:#fff; width:100%; padding:15px;">إضافة للسجل</button>
-</div>
-</div>
-
-<div class="sectionPage" id="rejectedSection">
-<div class="section">
-<h2>🗑️ قائمة المجمدة التالفة (Produit Rebuté)</h2>
-<label>اسم الفريزر:</label>
-<select id="rejectedFreezerName">
-  <option value="RFDK510G">RFDK510G</option><option value="CFH140A">CFH140A</option><option value="CFH-MT26">CFH-MT26</option><option value="CFH-MT260V4G">CFH-MT260V4G</option><option value="CFH-MT260V4W">CFH-MT260V4W</option><option value="CFH-MT26G">CFH-MT26G</option><option value="CFH-T130V2G">CFH-T130V2G</option><option value="CFH-T130V2W">CFH-T130V2W</option><option value="CFH-T13GM03">CFH-T13GM03</option><option value="CFH-T19GM04">CFH-T19GM04</option><option value="CFH-T390V1G">CFH-T390V1G</option><option value="CFH-T390V1W">CFH-T390V1W</option><option value="CFH-T390V2G">CFH-T390V2G</option><option value="CFH-T390V2W">CFH-T390V2W</option><option value="CFH-T39GM05">CFH-T39GM05</option><option value="CFH-T39GM05G">CFH-T39GM05G</option><option value="CFH-T450V2G">CFH-T450V2G</option><option value="CFH-T450V2W">CFH-T450V2W</option><option value="CFH-T45GM10">CFH-T45GM10</option><option value="CRD45V4G">CRD45V4G</option><option value="CRD45V4N">CRD45V4N</option><option value="CRD45V4W">CRD45V4W</option><option value="CRD45V4X">CRD45V4X</option><option value="CRD58V4G">CRD58V4G</option><option value="CRD58V4W">CRD58V4W</option><option value="CRD58V4X">CRD58V4X</option><option value="CRD65V4G">CRD65V4G</option><option value="CRD65V4W">CRD65V4W</option><option value="CRD65V4X">CRD65V4X</option><option value="CRF-T12GM7">CRF-T12GM7</option><option value="CRF-T12GM7N">CRF-T12GM7N</option><option value="CRF-T36GH07">CRF-T36GH07</option><option value="CRF-T36GH07-G">CRF-T36GH07-G</option><option value="FH-CR280V1G">FH-CR280V1G</option><option value="FH-CR280V1W">FH-CR280V1W</option><option value="FH-CR280V3G">FH-CR280V3G</option><option value="FH-CR280V3W">FH-CR280V3W</option><option value="FH-CR380G">FH-CR380G</option><option value="FH-CR380V2G">FH-CR380V2G</option><option value="FH-CR380V2W">FH-CR380V2W</option><option value="FH-CR380W">FH-CR380W</option><option value="KFV240W">KFV240W</option>
-</select>
-<br/>
-<label>نوع التلف:</label>
-<textarea id="rejectedDescription" rows="2" style="width:100%"></textarea>
-<br/>
-<label>صورة التلف:</label>
-<input accept="image/*" capture="environment" id="rejectedImageInput" onchange="previewRejectedImage()" type="file"/>
-<div id="rejectedImagePreviewContainer" style="display:none;"></div>
-<br/>
-<button onclick="addRejectedRow()" style="background:var(--alt-btn); color:#fff; width:100%;">إضافة للسجل</button>
-</div>
-
-<div class="section">
-  <h2>سجل المجمدة التالفة</h2>
-  <input id="loadRejectedDate" type="date"/>
-  <button onclick="loadRejectedData()">عرض</button>
-  <table id="rejectedTable">
-    <thead><tr><th>التاريخ</th><th>الوقت</th><th>الاسم</th><th>التلف</th><th>الصورة</th></tr></thead>
-    <tbody></tbody>
-  </table>
-</div>
-</div>
-
-<div class="sectionPage" id="dateSection">
-<div class="section">
-<h2>📋 التقارير والبيانات المحفوظة</h2>
-<label>تاريخ السجل:</label><input id="loadDate" type="date"/>
-<button onclick="loadData()">عرض</button>
-<button onclick="saveData()" class="alt">حفظ</button>
-<button onclick="exportTable('pdf')">PDF</button>
-<table id="logTable">
-<thead><tr><th>التاريخ</th><th>الوقت</th><th>الفترة</th><th>الاسم</th><th>المشكلة</th><th>القالب</th><th>وصف</th><th>الصورة</th></tr></thead>
-<tbody></tbody>
-</table>
-</div>
-</div>
-
-<div class="sectionPage" id="summarySection">
-<div class="section">
-<h2>📊 ملخص الأضرار</h2>
-<canvas id="damageChart" height="150"></canvas>
-<div id="summaryDetails">
-<h3 id="dailyReportTitle">التقرير اليومي</h3>
-<table id="dailyProblemTable"><thead><tr><th>المشكلة</th><th>عدد</th></tr></thead><tbody></tbody></table>
-</div>
-</div>
-</div>
-
-<div class="sectionPage" id="mouldDataSection">
-  <div class="section card" id="mouleDataCard">
-    <h2>📐 قياسات القوالب (MOULE Data)</h2>
-    <table>
-        <thead><tr><th>MOULE</th><th>TOP</th><th>SAY</th></tr></thead>
-        <tbody>
-            <tr><td>T13</td><td>8.6</td><td>49.5</td></tr>
-            <tr><td>T19(280)</td><td>8.6</td><td>49.5</td></tr>
-            <tr><td>T26</td><td>9.2</td><td>49.5</td></tr>
-            <tr><td>T38</td><td>9.2</td><td>57</td></tr>
-            <tr><td>T39</td><td>10.2</td><td>64</td></tr>
-            <tr><td>T45</td><td>10.2</td><td>64</td></tr>
-        </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="sectionPage" id="componentDataSection">
-  <div class="section card" id="componentDataCard">
-      <h2>🧪 تفاصيل المكونات (Component Data)</h2>
-      <table dir="ltr" style="font-size: 12px;">
-          <thead><tr><th>Article</th><th>Désignation</th><th>Qté</th><th>Total Kg</th></tr></thead>
-          <tbody id="compBody">
-            <tr><td rowspan="3">Porte T13</td><td>ISOCYANATE</td><td>0,342</td><td rowspan="3">0,579</td></tr>
-            <tr><td>POLYOL</td><td>0,213</td></tr>
-            <tr><td>CYCLOPENTHANE</td><td>0,024</td></tr>
-            </tbody>
-      </table>
+<div class="sectionPage active-section" id="searchSection">
+  <div class="card">
+    <h2 style="color:var(--accent)">🔍 البحث السريع (EAN6 / MODELE)</h2>
+    <input type="text" id="eanSearchInput" placeholder="أدخل الكود أو العائلة (FH, CFH...)" onkeyup="runEanSearch()">
+    <div id="familySpecs"></div>
+    <div id="eanResults" style="margin-top:15px;"></div>
   </div>
 </div>
 
 <div class="sectionPage" id="densitySection">
-  <div class="section card">
-    <h2>🌊 حساب الكثافة (air / water × 1000)</h2>
-    <select id="sampleType" onchange="renderPieceInputs()">
-      <option value="corps">المجمدة (Corps) — 5 قطع</option>
-      <option value="portes">الباب (Portes) — 3 قطع</option>
+  <div class="card">
+    <h2>🌊 حساب الكثافة (AIR / WATER)</h2>
+    <label>نوع العينة:</label>
+    <select id="sampleType" onchange="renderDensityInputs()">
+      <option value="CORPS">الهيكل (CORPS) - 5 قطع</option>
+      <option value="PORTES">الباب (PORTES) - 3 قطع</option>
     </select>
-    <div id="piecesArea" style="margin-top:12px;"></div>
-    <button onclick="calculateByPieces()" style="width:100%; padding:15px; margin-top:10px;">حساب الكثافة</button>
-    <div id="calcResult" class="result" style="font-size:20px;"></div>
-    <div id="calcWarning" class="warning"></div>
+    <div id="densityInputsArea" class="table-container"></div>
+    <button onclick="calculateDensity()">احسب المتوسط</button>
+    <div id="densityFinalResult" class="card" style="margin-top:15px; text-align:center; display:none; border: 2px solid var(--accent);">
+      <div style="font-size:1.6em; font-weight:bold;" id="resText"></div>
+      <div id="resWarning" style="font-weight: bold;"></div>
+    </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<div class="sectionPage" id="mouldDataSection">
+    <div class="card">
+        <h2>📐 قياسات القوالب (MOULE DATA)</h2>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>MOULE</th><th>TOP (MM)</th><th>SAY (MM)</th></tr></thead>
+                <tbody>
+                    <tr><td>T13</td><td>8.6</td><td>49.5</td></tr>
+                    <tr><td>T19(280)</td><td>8.6</td><td>49.5</td></tr>
+                    <tr><td>T26</td><td>9.2</td><td>49.5</td></tr>
+                    <tr><td>T38</td><td>9.2</td><td>57</td></tr>
+                    <tr><td>T39</td><td>10.2</td><td>64</td></tr>
+                    <tr><td>T45</td><td>10.2</td><td>64</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 <script>
-  // --- بيانات البحث (من الملف الثاني) ---
-  const eanDatabase = [
-    { ean: "030719", code: "RFDK510G" }, { ean: "043153", code: "CFH140A" },
-    { ean: "039965", code: "CFH-MT26" }, { ean: "048752", code: "CFH-MT260V4G" },
-    { ean: "048813", code: "CFH-MT260V4W" }, { ean: "044181", code: "CFH-MT26G" },
-    { ean: "048516", code: "CFH-T130V2G" }, { ean: "048271", code: "CFH-T130V2W" },
-    { ean: "012357", code: "CFH-T13GM03" }, { ean: "012364", code: "CFH-T19GM04" },
-    { ean: "048561", code: "CFH-T390V1G" }, { ean: "048592", code: "CFH-T390V1W" },
-    { ean: "048509", code: "CFH-T390V2G" }, { ean: "048288", code: "CFH-T390V2W" },
-    { ean: "012371", code: "CFH-T39GM05" }, { ean: "043115", code: "CFH-T39GM05G" },
-    { ean: "048493", code: "CFH-T450V2G" }, { ean: "048523", code: "CFH-T450V2W" },
-    { ean: "025623", code: "CFH-T45GM10" }, { ean: "035837", code: "CRD45V4G" },
-    { ean: "042880", code: "CRD45V4N" }, { ean: "035820", code: "CRD45V4W" },
-    { ean: "039330", code: "CRD45V4X" }, { ean: "035851", code: "CRD58V4G" },
-    { ean: "035844", code: "CRD58V4W" }, { ean: "039347", code: "CRD58V4X" },
-    { ean: "035868", code: "CRD65V4G" }, { ean: "035875", code: "CRD65V4W" },
-    { ean: "039354", code: "CRD65V4X" }, { ean: "022462", code: "CRF-T12GM7" },
-    { ean: "022806", code: "CRF-T12GM7N" }, { ean: "011930", code: "CRF-T36GH07" },
-    { ean: "014580", code: "CRF-T36GH07-G" }, { ean: "049438", code: "FH-CR280V1G" },
-    { ean: "049421", code: "FH-CR280V1W" }, { ean: "049452", code: "FH-CR280V3G" },
-    { ean: "049445", code: "FH-CR280V3W" }, { ean: "044198", code: "FH-CR380G" },
-    { ean: "049711", code: "FH-CR380V2G" }, { ean: "048738", code: "FH-CR380V2W" },
-    { ean: "039835", code: "FH-CR380W" }, { ean: "050595", code: "KFV240W" }
-  ];
+const eanDB = [
+    { ean: "030719", code: "RFDK510G", gas: "R600A (42G)" }, { ean: "043153", code: "CFH140A", gas: "R600A (38G)" },
+    { ean: "039965", code: "CFH-MT26", gas: "R600A (45G)" }, { ean: "048752", code: "CFH-MT260V4G", gas: "R600A (45G)" },
+    { ean: "048813", code: "CFH-MT260V4W", gas: "R600A (45G)" }, { ean: "044181", code: "CFH-MT26G", gas: "R600A (45G)" },
+    { ean: "048516", code: "CFH-T130V2G", gas: "R600A (35G)" }, { ean: "048271", code: "CFH-T130V2W", gas: "R600A (35G)" },
+    { ean: "012357", code: "CFH-T13GM03", gas: "R600A (35G)" }, { ean: "012364", code: "CFH-T19GM04", gas: "R600A (40G)" },
+    { ean: "048561", code: "CFH-T390V1G", gas: "R600A (55G)" }, { ean: "048592", code: "CFH-T390V1W", gas: "R600A (55G)" },
+    { ean: "048509", code: "CFH-T390V2G", gas: "R600A (55G)" }, { ean: "048288", code: "CFH-T390V2W", gas: "R600A (55G)" },
+    { ean: "048493", code: "CFH-T450V2G", gas: "R600A (60G)" }, { ean: "048523", code: "CFH-T450V2W", gas: "R600A (60G)" },
+    { ean: "035837", code: "CRD45V4G", gas: "R600A (50G)" }, { ean: "049438", code: "FH-CR280V1G", gas: "R600A (48G)" },
+    { ean: "048738", code: "FH-CR380V2W", gas: "R600A (58G)" }
+];
 
-  function performSearch() {
-    const term = document.getElementById('searchInput').value.toUpperCase();
-    const resDiv = document.getElementById('searchResults');
+const familySpecs = {
+    'FH': `<div class="version-box"><b style="color:var(--accent)">FH-CR280/380:</b><br>V1: THERMOSTAT MECANIQUE / CONSTANTE<br>V2: MECANIQUE / INVERTER<br>V3: ELECTRONIQUE / CONSTANTE</div>`,
+    'CFH': `<div class="version-box"><b style="color:var(--accent)">CFH SERIES:</b><br>V1: MECANIQUE / CONSTANTE<br>V2: ELECTRONIQUE / CONSTANTE<br>V3: ELECTRONIQUE / INVERTER<br>V4: MECANIQUE / INVERTER</div>`
+};
+
+function runEanSearch() {
+    const val = document.getElementById('eanSearchInput').value.toUpperCase();
+    const resDiv = document.getElementById('eanResults');
+    const specDiv = document.getElementById('familySpecs');
     resDiv.innerHTML = "";
-    const results = eanDatabase.filter(i => i.ean.includes(term) || i.code.includes(term));
-    if(results.length === 0) { resDiv.innerHTML = "<div class='error'>❌ لا توجد نتائج</div>"; return; }
-    results.forEach(item => {
-      resDiv.innerHTML += `<div class="search-result-item"><b>EAN6:</b> ${item.ean} | <b>الكود:</b> ${item.code}</div>`;
-    });
-  }
-
-  // --- وظائف الواجهة والتنقل ---
-  function toggleSidebar(){
-    const b = document.getElementById('mySidebar');
-    b.style.width = b.style.width === '250px' ? '0' : '250px';
-  }
-  function showSection(id){
-    document.querySelectorAll('.sectionPage').forEach(s=>s.style.display='none');
-    document.getElementById(id).style.display='block';
-    document.getElementById('mainMenu').style.display='none';
-    document.getElementById('heroSection').style.display='none';
-    if(id === 'densitySection') renderPieceInputs();
-    toggleSidebar();
-    showBackButton();
-  }
-  function openMainMenu() {
-    document.getElementById('heroSection').style.display = 'none';
-    document.getElementById('mainMenu').style.display = 'flex';
-  }
-  function navigateTo(id) { showSection(id); toggleSidebar(); }
-  
-  function showBackButton() {
-    if (!document.getElementById('backButton')) {
-      const btn = document.createElement('button');
-      btn.innerText = '⬅ رجوع'; btn.id = 'backButton';
-      btn.style = 'position: fixed; top: 20px; left: 20px; z-index: 15; background:#00cec9; color:#000;';
-      btn.onclick = () => {
-        document.querySelectorAll('.sectionPage').forEach(s => s.style.display = 'none');
-        document.getElementById('mainMenu').style.display = 'flex';
-        btn.remove();
-      };
-      document.body.appendChild(btn);
+    specDiv.innerHTML = familySpecs[val] || "";
+    if(!val) return;
+    const matches = eanDB.filter(i => i.ean.includes(val) || i.code.includes(val));
+    if(matches.length === 0 && !familySpecs[val]) {
+        resDiv.innerHTML = "<div style='color:#ff6b6b'>CE CODE EST FAUX</div>";
+    } else {
+        matches.forEach(m => {
+            resDiv.innerHTML += `<div class="search-item"><b>EAN6:</b> ${m.ean} | <b>MODELE:</b> ${m.code} <br> <span class="gas-badge">GAS: ${m.gas}</span></div>`;
+        });
     }
-  }
+}
 
-  // --- وظائف مراقبة الجودة (من الملف الأول) ---
-  function previewImage(){ /* كود المعاينة... */ }
-  function addRow(){ /* كود إضافة مشكلة... */ }
-  function calculateByPieces(){ /* كود الكثافة... */ }
-  function renderPieceInputs(){
-      const type = document.getElementById('sampleType').value;
-      const count = type === 'corps' ? 5 : 3;
-      const area = document.getElementById('piecesArea');
-      let html = `<table><thead><tr><th>القطعة</th><th>هواء (g)</th><th>ماء (g)</th></tr></thead><tbody>`;
-      for(let i=1;i<=count;i++){
-        html += `<tr><td>${i}</td><td><input type="number" class="air" data-i="${i}"></td><td><input type="number" class="water" data-i="${i}"></td></tr>`;
-      }
-      area.innerHTML = html + `</tbody></table>`;
+function renderDensityInputs() {
+  const type = document.getElementById('sampleType').value;
+  const count = type === 'CORPS' ? 5 : 3;
+  let html = `<table><tr><th>PIECE</th><th>AIR (G)</th><th>WATER (G)</th></tr>`;
+  for(let i=1; i<=count; i++) {
+    html += `<tr><td>${i}</td><td><input type="number" step="0.01" class="air-in"></td><td><input type="number" step="0.01" class="wat-in"></td></tr>`;
   }
-  
-  // تهيئة عند التحميل
-  window.onload = () => {
-    document.getElementById('date').valueAsDate = new Date();
-  };
+  document.getElementById('densityInputsArea').innerHTML = html + `</table>`;
+}
+
+function calculateDensity() {
+  const airs = document.querySelectorAll('.air-in'), wats = document.querySelectorAll('.wat-in');
+  let sum = 0, valid = 0;
+  airs.forEach((a, i) => {
+    const vA = parseFloat(a.value), vW = parseFloat(wats[i].value);
+    if(vA > 0 && vW > 0) { sum += (vA/vW)*1000; valid++; }
+  });
+  const resDiv = document.getElementById('densityFinalResult');
+  if(valid === 0) return;
+  const avg = (sum/valid).toFixed(2);
+  resDiv.style.display = 'block';
+  document.getElementById('resText').innerText = `MOYENNE: ${avg} KG/M³`;
+  const ok = (avg >= 34 && avg <= 38);
+  document.getElementById('resWarning').innerText = ok ? "✅ CONFORME (34-38)" : "⚠️ NON CONFORME";
+  document.getElementById('resWarning').style.color = ok ? "#55efc4" : "#ff7675";
+}
+
+function showSection(id) {
+  document.querySelectorAll('.sectionPage').forEach(s => s.classList.remove('active-section'));
+  document.getElementById(id).classList.add('active-section');
+  toggleSidebar();
+}
+
+function toggleSidebar() {
+  const s = document.getElementById("mySidebar");
+  s.style.width = s.style.width === "250px" ? "0" : "250px";
+}
+
+window.onload = () => { if(document.getElementById('densitySection').classList.contains('active-section')) renderDensityInputs(); };
 </script>
 </body>
 </html>
+<a href="#" onclick="showSection('injectionWeightSection')">⚖️ أوزان الحقن والكثافة الحرة</a>
+<div class="sectionPage" id="injectionWeightSection">
+  <div class="section card">
+    <h2 style="color:var(--accent)">⚖️ أوزان الحقن والكثافة الحرة (POIDS INJECTÉ)</h2>
+    <p style="text-align:center; color:#ccc;">القيم المعيارية لعملية الحقن حسب نوع الموديل (بيانات الصورة المرفقة)</p>
+    
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>MODÈLE</th>
+            <th>CORPS (G)</th>
+            <th>PORTES (G)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>CFH-T130</td><td>3,400 G</td><td>600 G</td></tr>
+          <tr><td>CFH-T19</td><td>4,150 G</td><td>815 G</td></tr>
+          <tr><td>CFH-MT260</td><td>4,800 G</td><td>1,000 G</td></tr>
+          <tr><td>FH-CR380</td><td>5,300 G</td><td>1,200 G</td></tr>
+          <tr><td>CFH-T390</td><td>7,600 G</td><td>1,700 G</td></tr>
+          <tr><td>CFHT450</td><td>9,600 G</td><td>2,100 G</td></tr>
+          <tr style="background: #111; font-weight: bold; color: var(--accent);">
+            <td>DENSITÉ LIBRE</td>
+            <td>1,900 G ± 50G</td>
+            <td>900 G ± 50G</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

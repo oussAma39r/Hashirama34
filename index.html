@@ -208,3 +208,80 @@ window.onload = () => { if(document.getElementById('densitySection').classList.c
     </div>
   </div>
 </div>
+<a href="#" onclick="showSection('gasChargeSection')">⛽ كمية غاز الشحن (GAS)</a>
+<div class="sectionPage" id="gasChargeSection">
+  <div class="section card">
+    <h2 style="color:var(--accent)">⛽ نوع المجمدة وكمية الغاز (R600A)</h2>
+    <p style="text-align:center; color:#ccc;">كمية الغاز المضخ في الضاغط بالغرام (G)</p>
+    
+    <input type="text" id="gasSearchInput" placeholder="ابحث عن الموديل هنا (مثال: CFH)..." onkeyup="filterGasTable()" style="margin-bottom: 10px; border-color: var(--accent);">
+
+    <div class="table-container">
+      <table id="gasDataTable">
+        <thead>
+          <tr>
+            <th>MARQUE</th>
+            <th>MODÈLE</th>
+            <th>CHARGE (G)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>HISENSE</td><td>FC-19 DT4SAW</td><td>45G</td></tr>
+          <tr><td>HISENSE</td><td>FC-33DT4SAW</td><td>58G</td></tr>
+          <tr><td>HISENSE</td><td>FC-26DT4SAW</td><td>53G</td></tr>
+          <tr><td>HISENSE</td><td>RS-34W</td><td>42G</td></tr>
+          <tr><td>WHIRLPOOL</td><td>WQUF906623XBRDZ</td><td>77G</td></tr>
+          <tr><td>WHIRLPOOL</td><td>CM400-HC</td><td>73G</td></tr>
+          <tr><td>WHIRLPOOL</td><td>WCF400MOSDZ</td><td>73G</td></tr>
+          <tr><td>WHIRLPOOL</td><td>WCF300MOSDZ</td><td>57G</td></tr>
+          <tr><td>CANDY</td><td>K-CUG500FX</td><td>82G</td></tr>
+          <tr><td>CANDY</td><td>K-CCG400FW</td><td>55G</td></tr>
+          <tr><td>CANDY</td><td>K-CDHT640FWB</td><td>57G</td></tr>
+          <tr><td>CANDY</td><td>CCH200K</td><td>60G</td></tr>
+          <tr><td>CANDY</td><td>K-CDHT570FX</td><td>56G</td></tr>
+          <tr><td>NARDI</td><td>NFV670ADX</td><td>66G</td></tr>
+          <tr><td>NARDI</td><td>NRC640R</td><td>53G</td></tr>
+          <tr><td>NARDI</td><td>NRC740ADX</td><td>58G</td></tr>
+          <tr><td>CRISTOR</td><td>KFV300X</td><td>64G</td></tr>
+          <tr><td>CRISTOR</td><td>FH-CR380</td><td>66G</td></tr>
+          <tr><td>CRISTOR</td><td>FH-CR280</td><td>55G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CRP600</td><td>68G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CFH-T390</td><td>62G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CFH-T140</td><td>42G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CFH-MT26</td><td>58G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>RCU240DG</td><td>33G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CFH-T130</td><td>42G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CFH-T19</td><td>55G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CFH-T39</td><td>62G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CFH-T45</td><td>80G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CRF-T24GD14</td><td>33G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CFH34P</td><td>65G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CRF-T5</td><td>16G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CRP120</td><td>25G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CRF-T12GM7</td><td>20G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CFVN55AX</td><td>57G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CRD58</td><td>85G</td></tr>
+          <tr style="background: #2a2a2a;"><td>CONDOR</td><td>CRD 65</td><td>90G</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// دالة البحث لتصفية جدول الغاز
+function filterGasTable() {
+  let input = document.getElementById("gasSearchInput").value.toUpperCase();
+  let table = document.getElementById("gasDataTable");
+  let tr = table.getElementsByTagName("tr");
+
+  for (let i = 1; i < tr.length; i++) {
+    let tdModel = tr[i].getElementsByTagName("td")[1];
+    let tdBrand = tr[i].getElementsByTagName("td")[0];
+    if (tdModel || tdBrand) {
+      let txtValue = (tdModel.textContent || tdModel.innerText) + (tdBrand.textContent || tdBrand.innerText);
+      tr[i].style.display = txtValue.toUpperCase().indexOf(input) > -1 ? "" : "none";
+    }
+  }
+}
+</script>
